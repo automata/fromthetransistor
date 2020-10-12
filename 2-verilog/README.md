@@ -1,5 +1,5 @@
 ## Verilog
-```
+```verilog
 module hello;
     initial begin
         $display("hello world"); $finish;
