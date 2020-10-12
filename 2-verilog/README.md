@@ -40,6 +40,8 @@ endmodule
     - `wire [7:0] sum; // 8bit net`
 - arrays:
     - `reg [7:0] mem[0:4095]; // an array of 4096 8bit regs`
+- **module inputs** are by default wires (obvs, you can connect modules inbetween only with wires)
+- **module outputs** are either *reg* or *wire*
 
 #### Value set
 - 0: logic zero
@@ -51,6 +53,7 @@ endmodule
 
 - when a signal is driven by multiple drivers, it will take on the value of the driver with the highest strength; if two drivers have the same strenght, then the value is unknown (X || x).
 
+
 ### (Continuous) Assignments
 - all assignments are executed concurrently unless specified otherwise (since this described hardware, hence nothing is sequential by nature)
     - that means that the below (*combinational logic*) code will be synthesized to 3 separate circuits; all assignments will be run concurrently:
@@ -61,7 +64,7 @@ endmodule
 
         ```
     - the `=` here is a `continous assignment`
-    - a gate delay can be added for both the rising and falling transitions of the continous assignment (scale set with `timescale`)
+    - a gate delay can be added for both the rising and falling transitions of the continous assignment (scale set with `timescale`). **THIS IS NOT SYNTHESIZABLE** -- if you really want a delay use a simple counter dependent on the driving clock
         ```verilog
         `timescale 1ns/1ps
         module delayed
@@ -79,6 +82,54 @@ endmodule
 - sequential elements can only be modelled using `always` statements
 - to test the logic you can write test benches (although I think I'll write those directly in verilator's C++ top-level file)
 
+### Primitives
+- NOTE: primitives can all accept delays `not #2 U0 (...)` just like `assign`
+#### Gate Level Primitives
+- provided by the language itself
+- **not()**, **and()**, **nand()**, **or()**, **nor()**, **xor()**, **xnor()**
+- each of these are instantiated as lower level subsystems (i.e. modules)
+- benefits: number of inputs can be easily scaled **AND** you get a gate-level netlist so these are ready to be synthesized
+    ```verilog
+    module SystemX (output wire F,
+                    input wire A, B, C);
+        wire An, Bn, Cn; // internal nets
+        wire m0, m2, m6;
+
+        // output is listed first in the port mapping
+        // not, and etc are all subsystems, so their name appears before the port list (U0, U1 etc)
+        not U0 (An, A);
+        not U1 (Bn, B);
+        not U2 (Cn, C);
+
+        and U3 (m0, An, Bn, Cn);
+        and U4 (m2, An, B, Cn);
+        and U5 (m6, A, B, Cn);
+    endmodule
+    ```
+#### User Level Primitives
+- nice for repeatable combinational logic
+    ```verilog
+    primitive SystemX_UDP(output F, input A, B, C); // this needs its own file just like a module
+        table
+        //  A B: C
+            0 0: 1;
+            0 1: 1;
+            1 0: 0;
+            1 1: 1;
+        endtable
+    endprimitive
+    ```
+    ```verilog
+    module SystemX(output wire F, input wire A, B, C);
+        SystemX_UDP U0 (F, A, B, C);
+    endmodule
+    ```
+
+### Other stuff
+- **for**-loops are synthesizable since they don't run some operations sequentially but rather replicate the inner calls **n** times (`for (int i = 0; i < n; i++)`) (unroll + expand)
+
+## Vocab
+- **netlist**: description of the connectivity of some circuit
 ## Resources
 - [zipcpu verilog crash course](https://zipcpu.com/blog/2017/06/21/looking-at-verilator.html)
 - [verilator](https://www.veripool.org/wiki/verilator)
