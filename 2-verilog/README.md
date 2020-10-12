@@ -63,7 +63,7 @@ endmodule
     - the `=` here is a `continous assignment`
     - a gate delay can be added for both the rising and falling transitions of the continous assignment (scale set with `timescale`)
         ```verilog
-        timescale 1ns/1ps
+        `timescale 1ns/1ps
         module delayed
             assign #1 A = 4; // delay of 1 on all transitions
             assign #(2, 3) F = 1; // delay of 2ns on rise, 3ns on fall
