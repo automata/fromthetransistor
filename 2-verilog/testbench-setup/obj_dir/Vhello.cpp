@@ -22,6 +22,7 @@ void Vhello::eval_step() {
     QData __Vchange = 1;
     do {
         VL_DEBUG_IF(VL_DBG_MSGF("+ Clock loop\n"););
+        vlSymsp->__Vm_activity = true;
         _eval(vlSymsp);
         if (VL_UNLIKELY(++__VclockLoop > 100)) {
             // About to fail, so enable debug to see what's not settling.
@@ -30,7 +31,7 @@ void Vhello::eval_step() {
             Verilated::debug(1);
             __Vchange = _change_request(vlSymsp);
             Verilated::debug(__Vsaved_debug);
-            VL_FATAL_MT("hello.v", 2, "",
+            VL_FATAL_MT("hello.v", 3, "",
                 "Verilated model didn't converge\n"
                 "- See DIDNOTCONVERGE in the Verilator manual");
         } else {
@@ -42,6 +43,7 @@ void Vhello::eval_step() {
 void Vhello::_eval_initial_loop(Vhello__Syms* __restrict vlSymsp) {
     vlSymsp->__Vm_didInit = true;
     _eval_initial(vlSymsp);
+    vlSymsp->__Vm_activity = true;
     // Evaluate till stable
     int __VclockLoop = 0;
     QData __Vchange = 1;
@@ -55,7 +57,7 @@ void Vhello::_eval_initial_loop(Vhello__Syms* __restrict vlSymsp) {
             Verilated::debug(1);
             __Vchange = _change_request(vlSymsp);
             Verilated::debug(__Vsaved_debug);
-            VL_FATAL_MT("hello.v", 2, "",
+            VL_FATAL_MT("hello.v", 3, "",
                 "Verilated model didn't DC converge\n"
                 "- See DIDNOTCONVERGE in the Verilator manual");
         } else {
@@ -71,6 +73,13 @@ VL_INLINE_OPT void Vhello::_sequent__TOP__2(Vhello__Syms* __restrict vlSymsp) {
     VL_WRITEF("tick tock\n");
 }
 
+VL_INLINE_OPT void Vhello::_combo__TOP__3(Vhello__Syms* __restrict vlSymsp) {
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vhello::_combo__TOP__3\n"); );
+    Vhello* const __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
+    // Body
+    vlTOPp->test = vlTOPp->i_clk;
+}
+
 void Vhello::_eval(Vhello__Syms* __restrict vlSymsp) {
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vhello::_eval\n"); );
     Vhello* const __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
@@ -78,6 +87,7 @@ void Vhello::_eval(Vhello__Syms* __restrict vlSymsp) {
     if (((IData)(vlTOPp->i_clk) & (~ (IData)(vlTOPp->__Vclklast__TOP__i_clk)))) {
         vlTOPp->_sequent__TOP__2(vlSymsp);
     }
+    vlTOPp->_combo__TOP__3(vlSymsp);
     // Final
     vlTOPp->__Vclklast__TOP__i_clk = vlTOPp->i_clk;
 }

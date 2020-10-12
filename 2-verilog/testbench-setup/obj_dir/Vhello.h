@@ -13,6 +13,8 @@
 //==========
 
 class Vhello__Syms;
+class Vhello_VerilatedVcd;
+
 
 //----------
 
@@ -24,10 +26,12 @@ VL_MODULE(Vhello) {
     // propagate new values into/out from the Verilated model.
     VL_IN8(i_clk,0,0);
     VL_IN8(i_reset,0,0);
+    VL_OUT8(test,0,0);
     
     // LOCAL VARIABLES
     // Internals; generally not touched by application code
     CData/*0:0*/ __Vclklast__TOP__i_clk;
+    CData/*0:0*/ __Vm_traceActivity[1];
     
     // INTERNAL VARIABLES
     // Internals; generally not touched by application code
@@ -43,6 +47,8 @@ VL_MODULE(Vhello) {
     Vhello(const char* name = "TOP");
     /// Destroy the model; called (often implicitly) by application code
     ~Vhello();
+    /// Trace signals in the model; called by application code
+    void trace(VerilatedVcdC* tfp, int levels, int options = 0);
     
     // API METHODS
     /// Evaluate the model.  Application must call when inputs change.
@@ -63,6 +69,9 @@ VL_MODULE(Vhello) {
   private:
     static QData _change_request(Vhello__Syms* __restrict vlSymsp);
     static QData _change_request_1(Vhello__Syms* __restrict vlSymsp);
+  public:
+    static void _combo__TOP__3(Vhello__Syms* __restrict vlSymsp);
+  private:
     void _ctor_var_reset() VL_ATTR_COLD;
   public:
     static void _eval(Vhello__Syms* __restrict vlSymsp);
@@ -75,6 +84,16 @@ VL_MODULE(Vhello) {
     static void _eval_settle(Vhello__Syms* __restrict vlSymsp) VL_ATTR_COLD;
     static void _initial__TOP__1(Vhello__Syms* __restrict vlSymsp) VL_ATTR_COLD;
     static void _sequent__TOP__2(Vhello__Syms* __restrict vlSymsp);
+  private:
+    static void traceChgSub0(void* userp, VerilatedVcd* tracep);
+    static void traceChgTop0(void* userp, VerilatedVcd* tracep);
+    static void traceCleanup(void* userp, VerilatedVcd* /*unused*/);
+    static void traceFullSub0(void* userp, VerilatedVcd* tracep) VL_ATTR_COLD;
+    static void traceFullTop0(void* userp, VerilatedVcd* tracep) VL_ATTR_COLD;
+    static void traceInitSub0(void* userp, VerilatedVcd* tracep) VL_ATTR_COLD;
+    static void traceInitTop(void* userp, VerilatedVcd* tracep) VL_ATTR_COLD;
+    void traceRegister(VerilatedVcd* tracep) VL_ATTR_COLD;
+    static void traceInit(void* userp, VerilatedVcd* tracep, uint32_t code) VL_ATTR_COLD;
 } VL_ATTR_ALIGNED(VL_CACHE_LINE_BYTES);
 
 //----------

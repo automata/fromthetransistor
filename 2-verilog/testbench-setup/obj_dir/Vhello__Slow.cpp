@@ -20,7 +20,7 @@ void Vhello::__Vconfigure(Vhello__Syms* vlSymsp, bool first) {
     if (false && first) {}  // Prevent unused
     this->__VlSymsp = vlSymsp;
     if (false && this->__VlSymsp) {}  // Prevent unused
-    Verilated::timeunit(-12);
+    Verilated::timeunit(-9);
     Verilated::timeprecision(-12);
 }
 
@@ -53,6 +53,8 @@ void Vhello::final() {
 void Vhello::_eval_settle(Vhello__Syms* __restrict vlSymsp) {
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vhello::_eval_settle\n"); );
     Vhello* const __restrict vlTOPp VL_ATTR_UNUSED = vlSymsp->TOPp;
+    // Body
+    vlTOPp->_combo__TOP__3(vlSymsp);
 }
 
 void Vhello::_ctor_var_reset() {
@@ -60,4 +62,8 @@ void Vhello::_ctor_var_reset() {
     // Body
     i_clk = VL_RAND_RESET_I(1);
     i_reset = VL_RAND_RESET_I(1);
+    test = VL_RAND_RESET_I(1);
+    { int __Vi0=0; for (; __Vi0<1; ++__Vi0) {
+            __Vm_traceActivity[__Vi0] = VL_RAND_RESET_I(1);
+    }}
 }
