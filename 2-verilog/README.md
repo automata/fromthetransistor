@@ -187,6 +187,7 @@ endmodule
     - **non-blocking**: `a <= b`
         - the assignment to the target signal is deferred until the end of the procedural block
         - when this behaviour is coupled with triggering the block off a clock signal, this approach can model synthesizable sequential logic circuits
+        - **only generates** sequential logic (no way to describe circuits combinationally since assignment is deffered at the end of the block)
             ```verilog
             module dflipflip(output reg F, input wire, A, clk); // flip flip since both latches are driven by the same clock (non inverted on both)
                 reg B;
