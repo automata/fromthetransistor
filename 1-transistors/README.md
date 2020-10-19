@@ -51,6 +51,7 @@ gate-arrays --> prefab arrays of transistor gates on the wafer (mass-produced). 
 #### FPGAs
 - it's an IC
 - array of cells
+- can be programmed with new logic designs, same as ICs can be programmed with new firmware
 - each cell of the array contains a programmable logic function (CLB i.e. control logic block)
     - [Xilinx's CLB](https://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-884-complex-digital-systems-spring-2005/lecture-notes/l01_intro.pdf)
 - the boolean function is saved in a look-up table within the CLB
@@ -79,6 +80,12 @@ One iterates between all of them to meet functionality, fab and timing constrain
 - LUT + MUX == latch (asynchronous result)
 - LUT + MUX + DFF == flip-flop (synchronous CLK edge triggered result)
 
+#### Other stuff
+- high-impedance == allow relatively small current through per unit of applied voltage
+    - three state path == allow the output to be 0, 1 or simply have high impedance
+    - this allows multiple circuits to share the same wires/lines/buses, by rendering on of the outputs/inputs of a circuit obsolete at a certain point in time (obsolete == high impedance)
+    - outputs are tri-stated => their influence on the circuit is removed
+
 #### Resources
 - [MOSFETs](https://www.youtube.com/watch?v=ymFfw_MGceI)
 - [zooming into wafer](https://www.youtube.com/watch?v=Fxv3JoS1uY8)
@@ -93,8 +100,4 @@ One iterates between all of them to meet functionality, fab and timing constrain
 - [DDR muxes](http://spadic.uni-hd.de/publications/talks/2016/2016-09-28_ddrmux.pdf)
 - [shift registers](https://en.wikipedia.org/wiki/Shift_register)
     - so you can serialize data nicely
-
-- high-impedance == allow relatively small current through per unit of applied voltage
-    - three state path == allow the output to be 0, 1 or simply have high impedance
-    - this allows multiple circuits to share the same wires/lines/buses, by rendering on of the outputs/inputs of a circuit obsolete at a certain point in time (obsolete == high impedance)
-    - outputs are tri-stated => their influence on the circuit is removed
+- [hobbyist guide to FPGAs](https://hackaday.io/project/27550-the-hobbyists-guide-to-fpgas)
