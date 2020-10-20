@@ -48,6 +48,7 @@ FETs have 3 states:
 - each IC can accomplish some specific task and even though there are many ICs out there, sometimes it's still better to do your own circuit from discrete transistors.
 
 gate-arrays --> prefab arrays of transistor gates on the wafer (mass-produced). Then for each design, only customize metal layer.
+
 #### FPGAs
 - it's an IC
 - array of cells
@@ -57,19 +58,25 @@ gate-arrays --> prefab arrays of transistor gates on the wafer (mass-produced). 
 - the boolean function is saved in a look-up table within the CLB
     - lookup table i.e. LUT
     - LUT acts like memory. 4-in 1-out LUT can generate any 4-input boolean logic function
-- array has programmable interconnect between logic function
+- array has programmable interconnect between logic functions (so interconnects between `CLB`s and `IO` blocks)
 - arrays mass-produced, then programmed after fab
-    - programmed by blowing fuses, loading SRAM bits or flashing
+    - programmed by blowing fuses, loading SRAM bits or flashing (probably from bootrom, not sure)
+- cannot set initial state, since all is based on voltages; so you always need to wait for signals to settle, which you need to account for in the design.
+- `coarse grained` elements: dedicated memory (block RAM), embedded processors, flash memory, floating point units, multipliers etc. basically anything that's already pre-fabed
+    - main benefit: reduce density compared to building them from `CLB`s only.
 
-As in Verilog, three abstraction layer of programming FPGAs:
+As in Verilog, three abstraction layer of programming FPGAs (generalized, in reality can be more):
 - unit-transaction level (behavioural)
 - register transfer level
 - gate level
 One iterates between all of them to meet functionality, fab and timing constraints
 
-#### CLB
-- made out of an (read-only) LUT, a D-Flip-Flop and a multiplexer (this is called a slice, there can be multiple slices in the CLB)
-    - in reality this can be a bit more complex as a CLB can actually be made of multiples "slices", each of which contains an LUT, a DFF and some multiplexers
+##### CLB
+- this is considered `fine-grained` fabric
+- made out of an (read-only) LUT, a D-Flip-Flop and a multiplexer (this is called a slice, there can be multiple slices in the CLB) + a fast interconnect.
+    - in reality this can be a bit more complex as a CLB can actually be made of multiples "slices", each of which contains an LUT, a DFF and some multiplexers + interconnects
+    - slices can also have other sutff like carry chains, shift registers, internal muxes, xor gates etc.
+- interconnects can be routed to other CLBs, IO blocks or some other coarse grained on-board fabric
 - LUT stores the functions outputs
 - the multiplexer is used to select an output based on the input (all from LUT)
 - in order to update the LUT based on the result of some combinational logic, use the DFF. DFF is needed to make the whole thing sequential
@@ -88,7 +95,7 @@ One iterates between all of them to meet functionality, fab and timing constrain
 
 #### Resources
 - [MOSFETs](https://www.youtube.com/watch?v=ymFfw_MGceI)
-- [zooming into wafer](https://www.youtube.com/watch?v=Fxv3JoS1uY8)
+- [Zooming into wafer](https://www.youtube.com/watch?v=Fxv3JoS1uY8)
 - [computation structures MIT](https://computationstructures.org/index.html)
     - go through the first section "Digital Circuits"
 - [CMOS fabrication](https://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-884-complex-digital-systems-spring-2005/lecture-notes/l03_cmos_gates.pdf)
@@ -98,6 +105,7 @@ One iterates between all of them to meet functionality, fab and timing constrain
 - [Xilinx FPGA data sheet with CLBs explained](https://www.xilinx.com/support/documentation/data_sheets/ds099.pdf)
     - this is actually quite nice since it also explains IO blocks, interconnects, how the clock works in an FPGA (and how can you change its its frequency i.e. phase shifting)
 - [DDR muxes](http://spadic.uni-hd.de/publications/talks/2016/2016-09-28_ddrmux.pdf)
-- [shift registers](https://en.wikipedia.org/wiki/Shift_register)
+- [Shift registers](https://en.wikipedia.org/wiki/Shift_register)
     - so you can serialize data nicely
-- [hobbyist guide to FPGAs](https://hackaday.io/project/27550-the-hobbyists-guide-to-fpgas)
+- [Hobbyist guide to FPGAs](https://hackaday.io/project/27550-the-hobbyists-guide-to-fpgas)
+- [Modeling interconnects between coarse and fine-grained FPGA fabrics](http://downloads.hindawi.com/journals/ijrc/2008/736203.pdf)
