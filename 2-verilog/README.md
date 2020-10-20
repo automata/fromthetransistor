@@ -322,7 +322,10 @@ endmodule
         $time() // returns current time
         ```
 ### Testbenches
-- avoid them like the plague.
+- avoid them like the plague, use verilator instead (see header `testbench.h`)
+
+### Synthesis
+- command: `yosys -S <input>.v -o synth.v`
 
 ## Vocab
 - **netlist**: description of the connectivity of some circuit
