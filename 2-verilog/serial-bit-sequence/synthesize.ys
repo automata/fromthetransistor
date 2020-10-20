@@ -1,0 +1,10 @@
+read_verilog serial.v;
+hierarchy -check;
+
+# high-level synthesis
+# proc; opt; fsm; opt; memory; opt;
+
+# map coarse-grain cells (http://downloads.hindawi.com/journals/ijrc/2008/736203.pdf)
+# extract -map serial.v;
+
+show;

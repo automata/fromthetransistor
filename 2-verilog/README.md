@@ -7,9 +7,9 @@ module hello;
 endmodule
 ```
 
-- since I don't currently have an FPGA at hand, all Verilog code is synthesized and simulated with [Verilator](https://www.veripool.org/wiki/verilator)
-- for arch systems, install `verilator` with `yay -S verilator`. The headers headers will be in `/usr/share/verilator/include/` (if not there, try `verilator -V`)
-    - has `systemc` as a dependency when generating waveform traces: `yay -S systemc`
+- since I don't currently have an FPGA at hand, all Verilog code is synthesized and simulated with [Verilator](https://www.veripool.org/wiki/verilator) and [yosys](http://www.clifford.at/yosys/)
+- for arch systems, install `verilator` with `yay -S verilator`. Same with `yosys`. To view the designs, install `graphviz && xdot`. For **verilator**, the headers will be in `/usr/share/verilator/include/` (if not there, see `verilator -V`)
+    - `systemc` is a dependency for generating waveform traces: `yay -S systemc`
 - [GTKWave](http://gtkwave.sourceforge.net/) is used to visualize the signal waveforms: `yay -S gtkwave`
 
 ### What is Verilog?
