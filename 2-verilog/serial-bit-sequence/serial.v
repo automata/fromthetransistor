@@ -1,7 +1,7 @@
 // given a bitstream from some transmiter, drive signal error if the sequence 111 is detected.
 module serial
     (output reg error,
-     input wire Din, clk); // no reset
+     input wire Din, clk, reset);
 
     // encode the states
     parameter   Start = 3'b000,
@@ -12,9 +12,10 @@ module serial
 
     // define memory
     reg [2:0] current_state, next_state;
-    always @ (posedge clk)
+    always @ (posedge clk or negedge reset)
     begin: MEMORY
-        current_state <= next_state;
+        if (!reset) current_state <= Start;
+        else        current_state <= next_state;
     end
 
     // define next_state based on inputs and current_state, so define the
@@ -31,11 +32,13 @@ module serial
         endcase
     end
 
-    // define outputs based on current state only
-    always @ (current_state)
+    // define outputs based on current state and Din
+    // output based on current_state and inputs, so previous results
+    // not encoded in the current_state, so this is a mealy function
+    always @ (current_state or Din)
     begin: OUTPUT_LOGIC
         case (current_state)
-            D1_is_1: if (Din == 1'b1) error = 1'b1; else error = 1'b0;
+            D1_is_1: if (Din == 1'b1) error = 1'b1; else error = 1'b0; // mealy, since output not present in current state
             default: error = 1'b0;
         endcase
     end
