@@ -339,9 +339,16 @@ endmodule
 
 ### Synthesis
 - command: `yosys -S <input>.v -o synth.v`
+- low-level synthesis: mapping HDLs onto an implementation of underlying hardware component types
+- high-level synthesis: mapping a software language onto hardware component types (new, mixed success)
 
 ## Vocab
 - **netlist**: description of the connectivity of some circuit
+## Things to checkout
+- [nmigen](https://github.com/m-labs/nmigen)
+- [spinalHDL](https://spinalhdl.github.io/SpinalDoc-RTD/)
+- [ ] What are Phased Locked Loops?
+-
 ## Resources
 ### Software
 - [Verilator](https://www.veripool.org/wiki/verilator)
