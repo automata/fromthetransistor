@@ -235,6 +235,19 @@ endmodule
         endmodule
         ```
 - rule: use all inputs in the sensitivity list ==> combinational logic
+    - rule of thumb: "Unless you're modelling a clocked flip flop, you should always use the default (`@*`) sensitivity list for a combinational block."
+    - https://stackoverflow.com/questions/16312116/verilog-always-sensitivity-list
+- if you write something like this:
+    ```verilog
+    module temp(input reg [1:0] in, output wire out);
+    always @ (*)
+    begin
+        $display("here");
+        out = in;
+    end
+    endmodule
+    ```
+    - since the input is a 2-bit bus, this block will trigger on each bit in `in` in simulation, but synthesis will fail unless you `genvar` it
 #### Statement groups
 - `begin` and `end` --> all statements run in order
     ```verilog
@@ -330,11 +343,14 @@ endmodule
 ## Vocab
 - **netlist**: description of the connectivity of some circuit
 ## Resources
-- [zipcpu verilog crash course](https://zipcpu.com/blog/2017/06/21/looking-at-verilator.html)
+### Software
+- [Verilator](https://www.veripool.org/wiki/verilator)
+- [See signal waves nicely with gtkwave](http://gtkwave.sourceforge.net/)
 - [FPGA design flow](https://zipcpu.com/blog/2020/04/01/design-flow.html)
     - quite involved, but `yosys` and `gtkwave` are quite handy.
-- [verilator](https://www.veripool.org/wiki/verilator)
-- [verilog cheatsheet](https://marceluda.github.io/rp_dummy/EEOF2018/Verilog_Cheat_Sheet.pdf)
-- [see signal waves nicely](http://gtkwave.sourceforge.net/)
-- [verilog in one day](http://www.asic-world.com/verilog/)
+### Papers and Tutorials
 - [Quick Start Guide to Verilog](https://www.springer.com/gp/book/9783030105518)
+- [Zipcpu verilog crash course](https://zipcpu.com/blog/2017/06/21/looking-at-verilator.html)
+- [Verilog cheatsheet](https://marceluda.github.io/rp_dummy/EEOF2018/Verilog_Cheat_Sheet.pdf)
+- [Another Verilog cheatsheet](https://www.cl.cam.ac.uk/~djg11/teaching/learners.pdf)
+- [Verilog in one day](http://www.asic-world.com/verilog/)
