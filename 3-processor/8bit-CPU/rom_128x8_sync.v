@@ -51,6 +51,6 @@ module rom_128x8_sync
     assign truncated_address = address[6:0];
 
     always @ (posedge clk)
-        if (enable) data_out = ROM[truncated_address]; // block here to force assignment on current timestep and thus read on a single clock
+        if (enable) data_out <= ROM[truncated_address];
 
 endmodule

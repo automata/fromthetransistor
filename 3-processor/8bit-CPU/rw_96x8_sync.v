@@ -14,7 +14,7 @@ module rw_96x8_sync
          else                                   enable = 1'b0;
 
      always @ (posedge clk)
-         if (enable && write)                   RW[address] = data_in; // block to force read on current timestep
-         else if (enable && !write)             data_out    = RW[address];
+         if (enable && write)                   RW[address] <= data_in; // BUST YO LOGIC WITH USELESS FFs!
+         else if (enable && !write)             data_out    <= RW[address];
 
 endmodule
