@@ -3,3 +3,4 @@
 **/binary
 verilator/
 tags
+obj_dir/
