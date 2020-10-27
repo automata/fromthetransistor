@@ -28,6 +28,23 @@ module memory
      input reg [7:0] port_in_13,
      input reg [7:0] port_in_14,
      input reg [7:0] port_in_15,
+     // output ports address space: 240..255 (xF0..xFF)
+     output reg [7:0] port_out_00,
+     output reg [7:0] port_out_01,
+     output reg [7:0] port_out_02,
+     output reg [7:0] port_out_03,
+     output reg [7:0] port_out_04,
+     output reg [7:0] port_out_05,
+     output reg [7:0] port_out_06,
+     output reg [7:0] port_out_07,
+     output reg [7:0] port_out_08,
+     output reg [7:0] port_out_09,
+     output reg [7:0] port_out_10,
+     output reg [7:0] port_out_11,
+     output reg [7:0] port_out_12,
+     output reg [7:0] port_out_13,
+     output reg [7:0] port_out_14,
+     output reg [7:0] port_out_15,
      // data_out is written on the CPU data bus
      // can be data from the RW or ROM memories, OR simply the input ports
      // so we multiplex it on <address>
@@ -57,7 +74,24 @@ module memory
         .address        (address),
         .clk            (clk),
         .reset          (reset),
-        .data_in        (data_in)     // to write to output port at <address>
+        .data_in        (data_in),     // to write to output port at <address>
+        .write          (write),
+        .port_out_00    (port_out_00),
+        .port_out_01    (port_out_01),
+        .port_out_02    (port_out_02),
+        .port_out_03    (port_out_03),
+        .port_out_04    (port_out_04),
+        .port_out_05    (port_out_05),
+        .port_out_06    (port_out_06),
+        .port_out_07    (port_out_07),
+        .port_out_08    (port_out_08),
+        .port_out_09    (port_out_09),
+        .port_out_10    (port_out_10),
+        .port_out_11    (port_out_11),
+        .port_out_12    (port_out_12),
+        .port_out_13    (port_out_13),
+        .port_out_14    (port_out_14),
+        .port_out_15    (port_out_15)
     );
 
     // handle non-clocked read from input ports and set appropriate data_out
@@ -67,7 +101,7 @@ module memory
               port_in_08, port_in_09, port_in_10, port_in_11,
               port_in_12, port_in_13, port_in_14, port_in_15)
         begin: MUX
-            if      (address >= 0 && address < 128)     data_out = rom_data_out;
+            if      (address < 128)                     data_out = rom_data_out;
             else if (address >= 128 && address < 224)   data_out = rw_data_out;
             else if (address == 8'hE0)                  data_out = port_in_00;
             else if (address == 8'hE1)                  data_out = port_in_01;

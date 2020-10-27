@@ -1,8 +1,10 @@
+/* verilator lint_off BLKSEQ */
 module rom_128x8_sync
     (input wire clk,
      input wire [7:0] address,
      output reg [7:0] data_out);
-    // Instruction set
+
+    // ------------------------ INSTRUCTION SET -----------------------------
     // load and stores
     parameter LDA_IMM = 8'h10; // <data> load register A using immediate addressing with <data>
     parameter LDA_DIR = 8'h11; // <addr> load register A using direct addressing from <addr>
@@ -31,23 +33,24 @@ module rom_128x8_sync
     parameter BCD     = 8'h38; // <addr> branch to <addr> if C=0 (carry flag)
 
     reg [7:0] ROM [0:127];
-    initial begin // not synthesizable
-        // load xAA in memory, then go to beginning of ROM
-        ROM[0] = LDA_IMM;
-        ROM[1] = 8'hAA;
-        ROM[2] = STA_DIR;
-        ROM[3] = 8'hE0;
-        ROM[4] = BRA;
-        ROM[5] = 8'h00; // go to the beginning
+    initial begin           // not synthesizable unless on Xilinx
+        ROM[0] = LDA_IMM;   // opcode
+        ROM[1] = 8'hAA;     // put this value into register A
+        ROM[2] = STA_DIR;   // opcode
+        ROM[3] = 8'hE0;     // store register A at this address
+        ROM[4] = BRA;       // opcode
+        ROM[5] = 8'h00;     // go to the beginning
     end
 
-    reg [1:0] enable;
+    reg enable;
     always @ (address)
-        if (address >= 0 && address < 128)  enable = 1'b1;
-        else                                enable = 1'b0;
+        if (address < 128)  enable = 1'b1;
+        else                enable = 1'b0;
+
+    wire [6:0] truncated_address; // ROM requires a 7 bit index, but address is 8, so we truncate
+    assign truncated_address = address[6:0];
 
     always @ (posedge clk)
-        if (enable)
-            data_out = ROM[address];
+        if (enable) data_out = ROM[truncated_address]; // block here to force assignment on current timestep and thus read on a single clock
 
 endmodule
