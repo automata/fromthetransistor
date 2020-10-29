@@ -1,4 +1,3 @@
-/* verilator lint_off BLKSEQ */
 module rom_128x8_sync
     (input wire clk,
      input wire [7:0] address,
@@ -24,7 +23,7 @@ module rom_128x8_sync
     // branches
     parameter BRA     = 8'h30; // <addr> branch always to <address>
     parameter BNU     = 8'h31; // <addr> branch to <addr> if N=1 (negative flag)
-    parameter BND     = 8'h32; // <addr> branch to <addr> if N=0 (negative flag)
+    parameter BND     = 8'h32; // <addr> branch to <addr> if N=0 (negative flag
     parameter BZU     = 8'h33; // <addr> branch to <addr> if Z=1 (zero flag)
     parameter BZD     = 8'h34; // <addr> branch to <addr> if Z=0 (zero flag)
     parameter BVU     = 8'h35; // <addr> branch to <addr> if V=1 (two's complement overflow flag)
@@ -51,6 +50,6 @@ module rom_128x8_sync
     assign truncated_address = address[6:0];
 
     always @ (posedge clk)
-        if (enable) data_out <= ROM[truncated_address];
+        if (enable) data_out <= ROM[truncated_address]; // will synthesize to 8 * 128 flipflops so 128 8bit registers
 
 endmodule

@@ -1,4 +1,3 @@
-/* verilator lint_off BLKSEQ */
 module rw_96x8_sync
     (input wire clk,
      input wire write, // can write?
