@@ -1,9 +1,10 @@
-module rw_96x8_sync
-    (input wire clk,
-     input wire write, // can write?
-     input wire [7:0] address,
-     input wire [7:0] data_in,
-     output reg [7:0] data_out);
+module rw_96x8_sync(
+    input wire clk,
+    input wire write, // can write?
+    input wire [7:0] address,
+    input wire [7:0] data_in,
+    output reg [7:0] data_out
+);
 
      reg [7:0] RW [128:223];
 

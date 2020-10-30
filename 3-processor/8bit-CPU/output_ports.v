@@ -1,26 +1,27 @@
 // writes data to the output ports
 // each output port has a buffer: data stored by the CPU will be there until written to again (so all ports are flip flops)
-module output_ports
-    (input wire clk, reset,
-     input wire write,
-     input wire [7:0] address, // 240..255 for outputs
-     input wire [7:0] data_in, // outputs FFs set from data_in
-     output reg [7:0] port_out_00,
-     output reg [7:0] port_out_01,
-     output reg [7:0] port_out_02,
-     output reg [7:0] port_out_03,
-     output reg [7:0] port_out_04,
-     output reg [7:0] port_out_05,
-     output reg [7:0] port_out_06,
-     output reg [7:0] port_out_07,
-     output reg [7:0] port_out_08,
-     output reg [7:0] port_out_09,
-     output reg [7:0] port_out_10,
-     output reg [7:0] port_out_11,
-     output reg [7:0] port_out_12,
-     output reg [7:0] port_out_13,
-     output reg [7:0] port_out_14,
-     output reg [7:0] port_out_15);
+module output_ports(
+    input wire clk, reset,
+    input wire write,
+    input wire [7:0] address, // 240..255 for outputs
+    input wire [7:0] data_in, // outputs FFs set from data_in
+    output reg [7:0] port_out_00,
+    output reg [7:0] port_out_01,
+    output reg [7:0] port_out_02,
+    output reg [7:0] port_out_03,
+    output reg [7:0] port_out_04,
+    output reg [7:0] port_out_05,
+    output reg [7:0] port_out_06,
+    output reg [7:0] port_out_07,
+    output reg [7:0] port_out_08,
+    output reg [7:0] port_out_09,
+    output reg [7:0] port_out_10,
+    output reg [7:0] port_out_11,
+    output reg [7:0] port_out_12,
+    output reg [7:0] port_out_13,
+    output reg [7:0] port_out_14,
+    output reg [7:0] port_out_15
+);
 
     always @ (posedge clk or negedge reset)
         if (!reset)                             port_out_00 <= 8'h00;

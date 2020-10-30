@@ -1,7 +1,8 @@
-module rom_128x8_sync
-    (input wire clk,
-     input wire [7:0] address,
-     output reg [7:0] data_out);
+module rom_128x8_sync(
+    input wire clk,
+    input wire [7:0] address,
+    output reg [7:0] data_out
+);
 
     // ------------------------ INSTRUCTION SET -----------------------------
     // load and stores
