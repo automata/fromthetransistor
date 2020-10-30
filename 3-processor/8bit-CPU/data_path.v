@@ -123,6 +123,7 @@ module data_path(
     alu _alu(
         .A      (A),            // input
         .B      (B),            // input
+        .SEL    (ALU_SEL),      // input
         .NZVC   (NZVC),         // output (flags)
         .RESULT (ALU_RESULT)    // output
     );
