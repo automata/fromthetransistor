@@ -8,12 +8,8 @@ module cpu(
 
     always @ (posedge clk or negedge reset)
     begin
-        control_unit cu(
-            .clk            (clk),
-            .reset          (reset),
-            .write          (write)
-        );
-
+        // the control unit is called directly from the data_path
+        // as it is the main FSM that controls the flow of data in the cpu
         data_path dp(
             .clk            (clk),
             .reset          (reset),
