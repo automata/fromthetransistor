@@ -14,7 +14,7 @@ module alu(
 
     always @ (A, B, SEL)
         case(SEL)
-            3'b000: begin: ADD_AB: A = A + B
+            3'b000: begin: ADD_AB
                         // carry + result
                         { NZVC[0], RESULT } = A + B;
 
@@ -28,11 +28,12 @@ module alu(
                             NZVC[2] = 0;
 
                         // overflow
-                        if ((A[7] == 0 && B[7] == 0 && RESULT[7] == 1) ||
-                            (A[7] == 1 && B[7] == 1 && RESULT[7] == 0))
-                            NZVC[1] = 1;
-                        else
-                            NZVC[1] = 0;
+                        if (!((A[7] == 0 && B[7] == 1) || (A[7] == 1 && B[7] == 0))) begin
+                            if ((A[7] == 0 && B[7] == 0 && RESULT[7] == 1) ||
+                                (A[7] == 1 && B[7] == 1 && RESULT[7] == 0))
+                                NZVC[1] = 1;
+                        end
+                        else NZVC[1] = 0;
                     end
             3'b001: begin: SUB_AB
                         // carry + result
@@ -46,10 +47,12 @@ module alu(
                         else NZVC[2] = 0;
 
                         // overflow
-                        if (A[7] != RESULT[7]) NZVC[1] = 1;
+                        if (!((A[7] == 0 && B[7] == 0) || (A[7] == 1 && B[7] == 1))) begin
+                            if (A[7] != RESULT[7]) NZVC[1] = 1;
+                        end
                         else NZVC[1] = 0;
                     end
-            3'b010: begin: AND_AB: A = A & B
+            3'b010: begin: AND_AB
                         RESULT = A & B;
 
                         // negative flag
@@ -58,6 +61,9 @@ module alu(
                         // zero flag
                         if (RESULT == 0) NZVC[2] = 1;
                         else NZVC[2] = 0;
+
+                        NZVC[0] = 0;
+                        NZVC[1] = 0;
                     end
             3'b011: begin: OR_AB
                         RESULT = A | B;
@@ -68,6 +74,9 @@ module alu(
                         // zero flag
                         if (RESULT == 0) NZVC[2] = 1;
                         else NZVC[2] = 0;
+
+                        NZVC[0] = 0;
+                        NZVC[1] = 0;
                     end
             3'b100: begin: INCA
                         // carry + result
@@ -83,10 +92,10 @@ module alu(
                             NZVC[2] = 0;
 
                         // overflow
-                        if ((A[7] != RESULT[7])) NZVC[1] = 1;
+                        if (A[7] == 0 && (A[7] != RESULT[7])) NZVC[1] = 1;
                         else NZVC[1] = 0;
                     end
-            3'b101: begin: INCB:
+            3'b101: begin: INCB
                         // carry + result
                         { NZVC[0], RESULT } = B + 1;
 
@@ -100,10 +109,10 @@ module alu(
                             NZVC[2] = 0;
 
                         // overflow
-                        if ((B[7] != RESULT[7])) NZVC[1] = 1;
+                        if (B[7] == 0 && (B[7] != RESULT[7])) NZVC[1] = 1;
                         else NZVC[1] = 0;
                     end
-            3'b110: begin: DECA:
+            3'b110: begin: DECA
                         // carry + result
                         { NZVC[0], RESULT } = A - 1;
 
@@ -117,10 +126,10 @@ module alu(
                             NZVC[2] = 0;
 
                         // overflow
-                        if ((A[7] != RESULT[7])) NZVC[1] = 1;
+                        if (A[7] == 1 && (A[7] != RESULT[7])) NZVC[1] = 1;
                         else NZVC[1] = 0;
                     end
-            3'b111: begin: DECB:
+            3'b111: begin: DECB
                         // carry + result
                         { NZVC[0], RESULT } = B - 1;
 
@@ -134,7 +143,7 @@ module alu(
                             NZVC[2] = 0;
 
                         // overflow
-                        if ((B[7] != RESULT[7])) NZVC[1] = 1;
+                        if (B[7] == 1 && (B[7] != RESULT[7])) NZVC[1] = 1;
                         else NZVC[1] = 0;
                     end
             default: begin
