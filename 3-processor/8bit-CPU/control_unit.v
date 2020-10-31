@@ -91,7 +91,16 @@ module control_unit(
                 S_STB_DIR_0 = 18,
                 S_STB_DIR_1 = 19,
                 S_STB_DIR_2 = 20,
-                S_STB_DIR_3 = 21;
+                S_STB_DIR_3 = 21,
+
+                S_ADD_AB    = 22,
+                S_SUB_AB    = 23,
+                S_AND_AB    = 24,
+                S_OR_AB     = 25,
+                S_INCA      = 26,
+                S_INCB      = 27,
+                S_DECA      = 28,
+                S_DECB      = 29;
 
 
     reg [7:0] current_state, next_state;
@@ -115,6 +124,14 @@ module control_unit(
                             else if (IR == LDB_DIR) next_state = S_LDB_DIR_0;
                             else if (IR == STA_DIR) next_state = S_STA_DIR_0;
                             else if (IR == STB_DIR) next_state = S_STB_DIR_0;
+                            else if (IR == ADD_AB)  next_state = S_ADD_AB;
+                            else if (IR == SUB_AB)  next_state = S_SUB_AB;
+                            else if (IR == AND_AB)  next_state = S_AND_AB;
+                            else if (IR == OR_AB)   next_state = S_OR_AB;
+                            else if (IR == INCA)    next_state = S_INCA;
+                            else if (IR == INCB)    next_state = S_INCB;
+                            else if (IR == DECA)    next_state = S_DECA;
+                            else if (IR == DECB)    next_state = S_DECB;
                         end
             // LDA_IMM
             S_LDA_IMM_0: next_state = S_LDA_IMM_1;
@@ -144,6 +161,22 @@ module control_unit(
             S_STB_DIR_1: next_state = S_STB_DIR_2;
             S_STB_DIR_2: next_state = S_STB_DIR_3;
             S_STB_DIR_3: next_state = S_FETCH_0;
+            // ADD_AB
+            S_ADD_AB: next_state    = S_FETCH_0;
+            // SUB_AB
+            S_SUB_AB: next_state    = S_FETCH_0;
+            // AND_AB
+            S_AND_AB: next_state    = S_FETCH_0;
+            // OR_AB
+            S_OR_AB: next_state     = S_FETCH_0;
+            // INCA
+            S_INCA: next_state      = S_FETCH_0;
+            // INCB
+            S_INCB: next_state      = S_FETCH_0;
+            // DECA
+            S_DECA: next_state      = S_FETCH_0;
+            // DECB
+            S_DECB: next_state      = S_FETCH_0;
         endcase
     end
 
@@ -545,6 +578,111 @@ module control_unit(
                             TO_MEMORY_BUS_SEL   = 2'b10; // 00 = PC; 01 = A; 10 = B;
                             FROM_MEMORY_BUS_SEL = 2'bXX; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
                             write = 1;
+                        end
+            // ALU stuff
+            S_ADD_AB:   begin
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 1;
+                            MAR_LOAD        = 0;
+                            PC_LOAD         = 0;
+                            PC_INC          = 1;
+                            A_LOAD          = 1;
+                            B_LOAD          = 0;
+                            ALU_SEL         = 3'b000;
+                            TO_MEMORY_BUS_SEL   = 2'b01; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b00; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 0;
+                        end
+            S_SUB_AB:   begin
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 1;
+                            MAR_LOAD        = 0;
+                            PC_LOAD         = 0;
+                            PC_INC          = 1;
+                            A_LOAD          = 1;
+                            B_LOAD          = 0;
+                            ALU_SEL         = 3'b001;
+                            TO_MEMORY_BUS_SEL   = 2'b01; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b00; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 0;
+                        end
+            S_AND_AB:   begin
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 1;
+                            MAR_LOAD        = 0;
+                            PC_LOAD         = 0;
+                            PC_INC          = 1;
+                            A_LOAD          = 1;
+                            B_LOAD          = 0;
+                            ALU_SEL         = 3'b010;
+                            TO_MEMORY_BUS_SEL   = 2'b01; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b00; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 0;
+                        end
+            S_OR_AB:    begin
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 1;
+                            MAR_LOAD        = 0;
+                            PC_LOAD         = 0;
+                            PC_INC          = 1;
+                            A_LOAD          = 1;
+                            B_LOAD          = 0;
+                            ALU_SEL         = 3'b011;
+                            TO_MEMORY_BUS_SEL   = 2'b01; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b00; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 0;
+                        end
+            S_INCA:     begin
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 1;
+                            MAR_LOAD        = 0;
+                            PC_LOAD         = 0;
+                            PC_INC          = 1;
+                            A_LOAD          = 1;
+                            B_LOAD          = 0;
+                            ALU_SEL         = 3'b100;
+                            TO_MEMORY_BUS_SEL   = 2'b01; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b00; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 0;
+                        end
+            S_INCB:     begin
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 1;
+                            MAR_LOAD        = 0;
+                            PC_LOAD         = 0;
+                            PC_INC          = 1;
+                            A_LOAD          = 0;
+                            B_LOAD          = 1;
+                            ALU_SEL         = 3'b101;
+                            TO_MEMORY_BUS_SEL   = 2'b10; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b00; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 0;
+                        end
+            S_DECA:     begin
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 1;
+                            MAR_LOAD        = 0;
+                            PC_LOAD         = 0;
+                            PC_INC          = 1;
+                            A_LOAD          = 1;
+                            B_LOAD          = 0;
+                            ALU_SEL         = 3'b110;
+                            TO_MEMORY_BUS_SEL   = 2'b01; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b00; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 0;
+                        end
+            S_DECB:     begin
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 1;
+                            MAR_LOAD        = 0;
+                            PC_LOAD         = 0;
+                            PC_INC          = 1;
+                            A_LOAD          = 0;
+                            B_LOAD          = 1;
+                            ALU_SEL         = 3'b111;
+                            TO_MEMORY_BUS_SEL   = 2'b10; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b00; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 0;
                         end
         endcase
     end

@@ -35,7 +35,12 @@ module rom_128x8_sync(
     reg [7:0] ROM [0:127];
     initial begin           // not synthesizable unless on Xilinx, just for testing things now
         ROM[0] = LDA_IMM;   // opcode
-        ROM[1] = 8'hFF;     // put this value into register A
+        ROM[1] = 8'h0F;     // put this value into register A
+
+        ROM[2] = LDB_IMM;   // opcode
+        ROM[3] = 8'h0F;     // put this value into register B
+
+        ROM[4] = ADD_AB;
 
         //ROM[0] = LDB_IMM;   // opcode
         //ROM[1] = 8'hAA;     // put this value into register A
@@ -46,8 +51,8 @@ module rom_128x8_sync(
         //ROM[0] = LDB_DIR;
         //ROM[1] = 8'h0F;
 
-        ROM[2] = STA_DIR;
-        ROM[3] = 8'h80;     // store the contents of A (xFF) at first RW memory byte
+        //ROM[2] = STA_DIR;
+        //ROM[3] = 8'h80;     // store the contents of A (xFF) at first RW memory byte
 
         ROM[15] = 8'hFF;
     end

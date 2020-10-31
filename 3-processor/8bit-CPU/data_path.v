@@ -111,7 +111,7 @@ module data_path(
 
     // ------------------ ALU -------------------
     alu _alu(
-        .A      (A),            // input
+        .A      (TO_MEMORY_BUS),// input; for ALU operations, content of A will always be put on the bus beforehand
         .B      (B),            // input
         .SEL    (ALU_SEL),      // input
         .NZVC   (NZVC),         // output (flags)

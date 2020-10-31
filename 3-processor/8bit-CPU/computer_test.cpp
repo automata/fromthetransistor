@@ -62,6 +62,15 @@ void stx_dir() { // sta or stb (8 states, so 9 cycles needed to arrive into init
   tick();
 }
 
+void alu() {
+  tick();
+  tick();
+  tick();
+  tick();
+  tick();
+  tick();
+}
+
 
 int main(int argc, char** argv) {
   // program is in ROM
@@ -72,7 +81,9 @@ int main(int argc, char** argv) {
   tb->reset();
 
   ldx_dir();
-  stx_dir();
+  ldx_dir();
+  alu();
+
 
   exit(EXIT_SUCCESS);
 }
