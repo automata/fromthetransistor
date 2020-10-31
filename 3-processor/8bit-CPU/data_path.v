@@ -67,29 +67,47 @@ module data_path(
 
     // registers
     always @ (posedge clk or negedge reset) // IR flip flops
+    begin
         if (!reset)         IR <= 8'h00;
         else if (IR_LOAD)   IR <= FROM_MEMORY_BUS;
+        $display("IR=%8b", IR);
+    end
 
     always @ (posedge clk or negedge reset) // MAR flip flops
+    begin
         if (!reset)         MAR <= 8'h00;
-        else if (MAR_LOAD)   MAR <= FROM_MEMORY_BUS;
+        else if (MAR_LOAD)  MAR <= FROM_MEMORY_BUS;
+        $display("MAR=%8b", MAR);
+    end
 
     always @ (posedge clk or negedge reset) // PC flip flops
+    begin
         if (!reset)         PC <= 8'h00;
         else if (PC_LOAD)   PC <= FROM_MEMORY_BUS;
         else if (PC_INC)    PC <= MAR + 1;
+        $display("PC=%8b", PC);
+    end
 
     always @ (posedge clk or negedge reset) // A and B flip flops
+    begin
         if (!reset)         A <= 8'h00;
         else if (A_LOAD)    A <= FROM_MEMORY_BUS;
+        $display("A=%8b", A);
+    end
 
     always @ (posedge clk or negedge reset)
+    begin
         if (!reset)         B <= 8'h00;
         else if (B_LOAD)    B <= FROM_MEMORY_BUS;
+        $display("B=%8.8b", B);
+    end
 
     always @ (posedge clk or negedge reset) // CCR flip flops (latches directly from ALU)
+    begin
         if (!reset)         CCR <= 4'h00;
         else if (CCR_LOAD)  CCR <= NZVC; // output from ALU
+        $display("CCR=%4b", CCR);
+    end
 
     // ------------------ ALU -------------------
     alu _alu(
@@ -99,5 +117,6 @@ module data_path(
         .NZVC   (NZVC),         // output (flags)
         .RESULT (ALU_RESULT)    // output
     );
+
 
 endmodule;
