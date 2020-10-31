@@ -36,10 +36,13 @@ module rom_128x8_sync(
     initial begin           // not synthesizable unless on Xilinx
         ROM[0] = LDA_IMM;   // opcode
         ROM[1] = 8'hAA;     // put this value into register A
-        ROM[2] = STA_DIR;   // opcode
-        ROM[3] = 8'hE0;     // store register A at this address
-        ROM[4] = BRA;       // opcode
-        ROM[5] = 8'h00;     // go to the beginning
+        ROM[2] = LDB_IMM;   // opcode
+        ROM[3] = 8'hAA;     // put this value into register A
+        ROM[4] = LDA_DIR;
+        ROM[5] = 8'h0F;
+        ROM[6] = LDB_DIR;
+        ROM[7] = 8'h0F;
+        ROM[15] = 8'hFF;
     end
 
     reg enable;
