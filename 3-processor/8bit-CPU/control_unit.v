@@ -1,10 +1,11 @@
+/* verilator lint_off UNUSED */
 // simple pipeline: decode, fetch, execute
 // no instruction pipelining (so 1 instruction per ~10 clock cycles) - not
 // sure if ARM also does it
 module control_unit(
     input wire clk, reset,
     input reg [7:0] IR,
-    input reg [7:0] CCR,
+    input reg [3:0] CCR,
     output reg IR_LOAD,
     output reg CCR_LOAD,
     output reg MAR_LOAD,
@@ -12,9 +13,9 @@ module control_unit(
     output reg PC_INC,
     output reg A_LOAD,
     output reg B_LOAD,
-    output reg ALU_SEL,
-    output reg FROM_MEMORY_BUS_SEL,
-    output reg TO_MEMORY_BUS_SEL,
+    output reg [2:0] ALU_SEL,
+    output reg [1:0] FROM_MEMORY_BUS_SEL,
+    output reg [1:0] TO_MEMORY_BUS_SEL,
     output reg write
 );
     // ------------------------ INSTRUCTION SET -----------------------------

@@ -50,7 +50,6 @@ module memory(
     // so we multiplex it on <address>
     output reg [7:0] data_out
 );
-
     reg [7:0] rom_data_out;
     reg [7:0] rw_data_out;
 
