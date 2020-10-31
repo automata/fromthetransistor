@@ -22,10 +22,47 @@
 
 Testbench<Vcomputer> *tb;
 
+void tick() {
+  tb->tick();
+  printf("\n");
+}
+
+void ldx_imm() {  // lda or ldb (7 states, so 8 cycles needed to arrive into init <S_FETCH_0> state)
+  tick();
+  tick();
+  tick();
+  tick();
+  tick();
+  tick();
+  tick();
+  tick();
+}
+
+void ldx_dir() { // lda or ldb (8 states, so 9 cycles needed to arrive into init <S_FETCH_0> state)
+  tick();
+  tick();
+  tick();
+  tick();
+  tick();
+  tick();
+  tick();
+  tick();
+  tick();
+}
+
 int main(int argc, char** argv) {
+  // program is in ROM
   Verilated::commandArgs(argc, argv);
 
   tb = new Testbench<Vcomputer>;
+
+  tb->reset();
+
+  ldx_dir();
+  ldx_dir();
+  ldx_imm();
+  ldx_imm();
+  tick();
 
   exit(EXIT_SUCCESS);
 }
