@@ -13,8 +13,8 @@ module control_unit(
     output reg A_LOAD,
     output reg B_LOAD,
     output reg ALU_SEL,
-    output reg FROM_MEMORY_SEL,
-    output reg TO_MEMORY_SEL,
+    output reg FROM_MEMORY_BUS_SEL,
+    output reg TO_MEMORY_BUS_SEL,
     output reg write
 );
     // fetch: (LDA_IMM)
@@ -79,8 +79,8 @@ module control_unit(
                             A_LOAD          = 0;
                             B_LOAD          = 0;
                             ALU_SEL         = 0;
-                            FROM_MEMORY_SEL = 2'b00; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
-                            TO_MEMORY_SEL   = 2'b00; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b00; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            TO_MEMORY_BUS_SEL   = 2'b00; // 00 = PC; 01 = A; 10 = B;
                             write = 0;
                         end
             // .. other states
