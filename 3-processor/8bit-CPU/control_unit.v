@@ -17,6 +17,34 @@ module control_unit(
     output reg TO_MEMORY_BUS_SEL,
     output reg write
 );
+    // ------------------------ INSTRUCTION SET -----------------------------
+    // load and stores
+    parameter LDA_IMM = 8'h10; // <data> load register A using immediate addressing with <data>
+    parameter LDA_DIR = 8'h11; // <addr> load register A using direct addressing from <addr>
+    parameter LDB_IMM = 8'h12; // <data> load register B using immediate addressing with <data>
+    parameter LDB_DIR = 8'h13; // <addr> load register B using direct addressing from <addr>
+    parameter STA_DIR = 8'h14; // <addr> store register A in memory to <addr> (direct addressing)
+    parameter STB_DIR = 8'h15; // <addr> store register B in memory to <addr> (direct addressing)
+    // data manipulations (ALU stuff)
+    parameter ADD_AB  = 8'h20; // A = A + B
+    parameter SUB_AB  = 8'h21; // A = A - B
+    parameter AND_AB  = 8'h22; // A = A & B
+    parameter OR_AB   = 8'h23; // A = A | B
+    parameter INCA    = 8'h24; // A = A + 1
+    parameter INCB    = 8'h25; // B = B + 1
+    parameter DECA    = 8'h26; // A = A - 1
+    parameter DECB    = 8'h27; // B = B - 1
+    // branches
+    parameter BRA     = 8'h30; // <addr> branch always to <address>
+    parameter BNU     = 8'h31; // <addr> branch to <addr> if N=1 (negative flag)
+    parameter BND     = 8'h32; // <addr> branch to <addr> if N=0 (negative flag
+    parameter BZU     = 8'h33; // <addr> branch to <addr> if Z=1 (zero flag)
+    parameter BZD     = 8'h34; // <addr> branch to <addr> if Z=0 (zero flag)
+    parameter BVU     = 8'h35; // <addr> branch to <addr> if V=1 (two's complement overflow flag)
+    parameter BVD     = 8'h36; // <addr> branch to <addr> if V=0 (two's complement overflow flag)
+    parameter BCU     = 8'h37; // <addr> branch to <addr> if C=1 (carry flag)
+    parameter BCD     = 8'h38; // <addr> branch to <addr> if C=0 (carry flag)
+
     // fetch: (LDA_IMM)
     //      init: PC register contains the memory address of the first opcode
     //         1. place PC value into MAR (MAR_LOAD)
@@ -57,20 +85,21 @@ module control_unit(
             S_FETCH_1:  next_state = S_FETCH_2;
             S_FETCH_2:  next_state = S_DECODE;
             S_DECODE:   begin
-                            if (IR == LDA_IMM) next_state = S_LDA_IMM_1;
-                            // else if (IR == ...
+                            if (IR == LDA_IMM) next_state = S_LDA_IMM_0;
+                            // else if (IR == ...)
                         end
             S_LDA_IMM_0: next_state = S_LDA_IMM_1;
             S_LDA_IMM_1: next_state = S_LDA_IMM_2;
-            S_LDA_IMM_2: next_state = S_LDA_IMM_3;
-            S_LDA_IMM_3: next_state = S_FETCH_0;
+            S_LDA_IMM_2: next_state = S_FETCH_0;
         endcase
     end
 
     always @ (current_state) // Moore machine so output logic depends solely on current_state
     begin: OUTPUT_LOGIC
+        // ------------------------- PIPELINE -------------------------
         case (current_state)
-            S_FETCH_0:  begin
+            // ------------------------- FETCH -------------------------
+            S_FETCH_0:  begin // one clock cycle to load MAR with PC
                             IR_LOAD         = 0;
                             CCR_LOAD        = 0;
                             MAR_LOAD        = 1;
@@ -79,11 +108,101 @@ module control_unit(
                             A_LOAD          = 0;
                             B_LOAD          = 0;
                             ALU_SEL         = 0;
-                            FROM_MEMORY_BUS_SEL = 2'b00; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
                             TO_MEMORY_BUS_SEL   = 2'b00; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b01; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
                             write = 0;
                         end
-            // .. other states
+            S_FETCH_1:  begin
+                            // MAR contains the opcode to be fetched at <address>;
+                            // memory[MAR] will take 1 clock cycle to fetch;
+                            // data will be available in the next clock cycle, so increment PC while waiting
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 0;
+                            MAR_LOAD        = 0;
+                            PC_LOAD         = 0;
+                            PC_INC          = 1;
+                            A_LOAD          = 0;
+                            B_LOAD          = 0;
+                            ALU_SEL         = 0;
+                            TO_MEMORY_BUS_SEL   = 2'b00; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b00; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 0;
+                        end
+            S_FETCH_2:  begin
+                            // memory[MAR] available, we put it into the FROM_MEMORY BUS and instruct IR to load it
+                            // after this, IR is loaded with the opcode, so we can decode the current instruction
+                            IR_LOAD         = 1;
+                            CCR_LOAD        = 0;
+                            MAR_LOAD        = 0;
+                            PC_LOAD         = 0;
+                            PC_INC          = 0;
+                            A_LOAD          = 0;
+                            B_LOAD          = 0;
+                            ALU_SEL         = 0;
+                            TO_MEMORY_BUS_SEL   = 2'b00; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b10; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 0;
+                        end
+            // ------------------------- DECODE -------------------------
+            S_DECODE:   begin
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 0;
+                            MAR_LOAD        = 0;
+                            PC_LOAD         = 0;
+                            PC_INC          = 0;
+                            A_LOAD          = 0;
+                            B_LOAD          = 0;
+                            ALU_SEL         = 0;
+                            TO_MEMORY_BUS_SEL   = 2'bXX;
+                            FROM_MEMORY_BUS_SEL = 2'bXX;
+                            write = 0;
+                        end
+            // ------------------------- EXECUTE -------------------------
+            // LDA_IMM: Load Register A with immediate addressing
+            S_LDA_IMM_0:begin
+                            // load A with immediate addressing i.e. directly with <operand>
+                            // first, fetch the operand from memory, will take 1 clock cycle, available at next clock cycle (same as S_FETCH_0)
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 0;
+                            MAR_LOAD        = 1;
+                            PC_LOAD         = 0;
+                            PC_INC          = 0;
+                            A_LOAD          = 0;
+                            B_LOAD          = 0;
+                            ALU_SEL         = 0;
+                            TO_MEMORY_BUS_SEL   = 2'b00; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b01; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 0;
+                        end
+            S_LDA_IMM_1:begin
+                            // increment PC while waiting for operand from memory
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 0;
+                            MAR_LOAD        = 0;
+                            PC_LOAD         = 0;
+                            PC_INC          = 0;
+                            A_LOAD          = 0;
+                            B_LOAD          = 0;
+                            ALU_SEL         = 0;
+                            TO_MEMORY_BUS_SEL   = 2'b00; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b00; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 0;
+                        end
+            S_LDA_IMM_2:begin
+                            // operand memory[MAR] is available on the bus, so
+                            // we load it into register A
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 0;
+                            MAR_LOAD        = 0;
+                            PC_LOAD         = 0;
+                            PC_INC          = 0;
+                            A_LOAD          = 1;
+                            B_LOAD          = 0;
+                            ALU_SEL         = 0;
+                            TO_MEMORY_BUS_SEL   = 2'b00; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b10; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 0;
+                        end
         endcase
     end
 
