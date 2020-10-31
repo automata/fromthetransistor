@@ -3,17 +3,17 @@ module data_path(
     input wire [7:0] from_memory,
     input wire IR_LOAD,     // IR is loading; fetch next program instruction from ROM
     input wire CCR_LOAD,    // CCR is loading; sets CCR flags depending on ALU operation output
-    input reg MAR_LOAD,     // MAR is loading; fetch from memory at the address in MAR, content put into FROM_MEMORY_BUS (data_out in memory.v)
-    input reg PC_LOAD,      // PC is loading; loads the PC register with contents from the FROM_MEMORY_BUS
-    input reg PC_INC,       // PC incrementing; increments the PC register to continue execution of program
-    input reg A_LOAD,       // A is loading with contents FROM_MEMORY_BUS
-    input reg B_LOAD,       // B is loading with contents FROM_MEMORY_BUS
-    input reg ALU_SEL,      // instruct ALU which operation to perform
-    input reg FROM_MEMORY_SEL, // multiplexer selector of what gets into FROM_MEMORY_BUS
-    input reg TO_MEMORY_SEL,    // multiplexer selector of what gets into TO_MEMORY_BUS
+    input wire MAR_LOAD,     // MAR is loading; fetch from memory at the address in MAR, content put into FROM_MEMORY_BUS (data_out in memory.v)
+    input wire PC_LOAD,      // PC is loading; loads the PC register with contents from the FROM_MEMORY_BUS
+    input wire PC_INC,       // PC incrementing; increments the PC register to continue execution of program
+    input wire A_LOAD,       // A is loading with contents FROM_MEMORY_BUS
+    input wire B_LOAD,       // B is loading with contents FROM_MEMORY_BUS
+    input wire ALU_SEL,      // instruct ALU which operation to perform
+    input wire FROM_MEMORY_SEL, // multiplexer selector of what gets into FROM_MEMORY_BUS
+    input wire TO_MEMORY_SEL,    // multiplexer selector of what gets into TO_MEMORY_BUS
     output reg [7:0] IR,        // IR register; contains content of IR -- input into control_unit (needed for decoding the current instruction)
     output reg [7:0] CCR,       // condition coder register (NZVC, Negative, Zero, Overflow, Carry) -- input into control unit
-    output wire [7:0] address,  // address to fetch stuff from in memory (contents of MAR)
+    output reg [7:0] address,  // address to fetch stuff from in memory (contents of MAR)
     output reg [7:0] to_memory  // stuff to put into memory at <address>
 );
     reg [7:0] ALU_RESULT;
