@@ -50,6 +50,19 @@ void ldx_dir() { // lda or ldb (8 states, so 9 cycles needed to arrive into init
   tick();
 }
 
+void stx_dir() { // sta or stb (8 states, so 9 cycles needed to arrive into init <S_FETCH_0> state)
+  tick();
+  tick();
+  tick();
+  tick();
+  tick();
+  tick();
+  tick();
+  tick();
+  tick();
+}
+
+
 int main(int argc, char** argv) {
   // program is in ROM
   Verilated::commandArgs(argc, argv);
@@ -59,10 +72,7 @@ int main(int argc, char** argv) {
   tb->reset();
 
   ldx_dir();
-  ldx_dir();
-  ldx_imm();
-  ldx_imm();
-  tick();
+  stx_dir();
 
   exit(EXIT_SUCCESS);
 }

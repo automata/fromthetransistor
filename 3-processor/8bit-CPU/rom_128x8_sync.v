@@ -33,15 +33,22 @@ module rom_128x8_sync(
     parameter BCD     = 8'h38; // <addr> branch to <addr> if C=0 (carry flag)
 
     reg [7:0] ROM [0:127];
-    initial begin           // not synthesizable unless on Xilinx
+    initial begin           // not synthesizable unless on Xilinx, just for testing things now
         ROM[0] = LDA_IMM;   // opcode
-        ROM[1] = 8'hAA;     // put this value into register A
-        ROM[2] = LDB_IMM;   // opcode
-        ROM[3] = 8'hAA;     // put this value into register A
-        ROM[4] = LDA_DIR;
-        ROM[5] = 8'h0F;
-        ROM[6] = LDB_DIR;
-        ROM[7] = 8'h0F;
+        ROM[1] = 8'hFF;     // put this value into register A
+
+        //ROM[0] = LDB_IMM;   // opcode
+        //ROM[1] = 8'hAA;     // put this value into register A
+
+        //ROM[0] = LDA_DIR;
+        //ROM[1] = 8'h0F;
+
+        //ROM[0] = LDB_DIR;
+        //ROM[1] = 8'h0F;
+
+        ROM[2] = STA_DIR;
+        ROM[3] = 8'h80;     // store the contents of A (xFF) at first RW memory byte
+
         ROM[15] = 8'hFF;
     end
 

@@ -81,7 +81,17 @@ module control_unit(
                 S_LDB_DIR_0 = 14,
                 S_LDB_DIR_1 = 15,
                 S_LDB_DIR_2 = 16,
-                S_LDB_DIR_3 = 17;
+                S_LDB_DIR_3 = 17,
+
+                S_STA_DIR_0 = 18,
+                S_STA_DIR_1 = 19,
+                S_STA_DIR_2 = 20,
+                S_STA_DIR_3 = 21,
+
+                S_STB_DIR_0 = 18,
+                S_STB_DIR_1 = 19,
+                S_STB_DIR_2 = 20,
+                S_STB_DIR_3 = 21;
 
 
     reg [7:0] current_state, next_state;
@@ -103,6 +113,8 @@ module control_unit(
                             else if (IR == LDA_DIR) next_state = S_LDA_DIR_0;
                             else if (IR == LDB_IMM) next_state = S_LDB_IMM_0;
                             else if (IR == LDB_DIR) next_state = S_LDB_DIR_0;
+                            else if (IR == STA_DIR) next_state = S_STA_DIR_0;
+                            else if (IR == STB_DIR) next_state = S_STB_DIR_0;
                         end
             // LDA_IMM
             S_LDA_IMM_0: next_state = S_LDA_IMM_1;
@@ -122,6 +134,16 @@ module control_unit(
             S_LDB_DIR_1: next_state = S_LDB_DIR_2;
             S_LDB_DIR_2: next_state = S_LDB_DIR_3;
             S_LDB_DIR_3: next_state = S_FETCH_0;
+            // STA_DIR
+            S_STA_DIR_0: next_state = S_STA_DIR_1;
+            S_STA_DIR_1: next_state = S_STA_DIR_2;
+            S_STA_DIR_2: next_state = S_STA_DIR_3;
+            S_STA_DIR_3: next_state = S_FETCH_0;
+            // STB_DIR
+            S_STB_DIR_0: next_state = S_STB_DIR_1;
+            S_STB_DIR_1: next_state = S_STB_DIR_2;
+            S_STB_DIR_2: next_state = S_STB_DIR_3;
+            S_STB_DIR_3: next_state = S_FETCH_0;
         endcase
     end
 
@@ -403,6 +425,126 @@ module control_unit(
                             TO_MEMORY_BUS_SEL   = 2'b00; // 00 = PC; 01 = A; 10 = B;
                             FROM_MEMORY_BUS_SEL = 2'b10; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
                             write = 0;
+                        end
+            // STA_DIR: Store register A in memory with direct addressing
+            S_STA_DIR_0:begin
+                            // first, fetch the operand from memory, will take 1 clock cycle, available at next clock cycle
+                            // memory[<operand>] will contain A
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 0;
+                            MAR_LOAD        = 1;
+                            PC_LOAD         = 0;
+                            PC_INC          = 0;
+                            A_LOAD          = 0;
+                            B_LOAD          = 0;
+                            ALU_SEL         = 0;
+                            TO_MEMORY_BUS_SEL   = 2'b00; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b01; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 0;
+                        end
+            S_STA_DIR_1:begin
+                            // while waiting, increment PC
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 0;
+                            MAR_LOAD        = 0;
+                            PC_LOAD         = 0;
+                            PC_INC          = 1;
+                            A_LOAD          = 0;
+                            B_LOAD          = 0;
+                            ALU_SEL         = 0;
+                            TO_MEMORY_BUS_SEL   = 2'b00; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b00; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 0;
+                        end
+            S_STA_DIR_2:begin
+                            // operand is on FROM_MEMORY_BUS, put it into MAR
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 0;
+                            MAR_LOAD        = 1;
+                            PC_LOAD         = 0;
+                            PC_INC          = 0;
+                            A_LOAD          = 0;
+                            B_LOAD          = 0;
+                            ALU_SEL         = 0;
+                            TO_MEMORY_BUS_SEL   = 2'b00; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b10; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 0;
+                        end
+            S_STA_DIR_3:begin
+                            // trigger memory load; this is combinational so
+                            // ROM should already provide it by the end of it
+                            // (available in FETCH)
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 0;
+                            MAR_LOAD        = 0;
+                            PC_LOAD         = 0;
+                            PC_INC          = 0;
+                            A_LOAD          = 0;
+                            B_LOAD          = 0;
+                            ALU_SEL         = 0;
+                            TO_MEMORY_BUS_SEL   = 2'b01; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'bXX; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 1;
+                        end
+            // STB_DIR: Store register B in memory with direct addressing
+            S_STB_DIR_0:begin
+                            // first, fetch the operand from memory, will take 1 clock cycle, available at next clock cycle
+                            // memory[<operand>] will contain B
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 0;
+                            MAR_LOAD        = 1;
+                            PC_LOAD         = 0;
+                            PC_INC          = 0;
+                            A_LOAD          = 0;
+                            B_LOAD          = 0;
+                            ALU_SEL         = 0;
+                            TO_MEMORY_BUS_SEL   = 2'b00; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b01; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 0;
+                        end
+            S_STB_DIR_1:begin
+                            // while waiting, increment PC
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 0;
+                            MAR_LOAD        = 0;
+                            PC_LOAD         = 0;
+                            PC_INC          = 1;
+                            A_LOAD          = 0;
+                            B_LOAD          = 0;
+                            ALU_SEL         = 0;
+                            TO_MEMORY_BUS_SEL   = 2'b00; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b00; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 0;
+                        end
+            S_STB_DIR_2:begin
+                            // operand is on FROM_MEMORY_BUS, put it into MAR
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 0;
+                            MAR_LOAD        = 1;
+                            PC_LOAD         = 0;
+                            PC_INC          = 0;
+                            A_LOAD          = 0;
+                            B_LOAD          = 0;
+                            ALU_SEL         = 0;
+                            TO_MEMORY_BUS_SEL   = 2'b00; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'b10; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 0;
+                        end
+            S_STB_DIR_3:begin
+                            // trigger memory load; this is combinational so
+                            // ROM should already provide it by the end of it
+                            // (available in FETCH)
+                            IR_LOAD         = 0;
+                            CCR_LOAD        = 0;
+                            MAR_LOAD        = 0;
+                            PC_LOAD         = 0;
+                            PC_INC          = 0;
+                            A_LOAD          = 0;
+                            B_LOAD          = 0;
+                            ALU_SEL         = 0;
+                            TO_MEMORY_BUS_SEL   = 2'b10; // 00 = PC; 01 = A; 10 = B;
+                            FROM_MEMORY_BUS_SEL = 2'bXX; // 00 = ALU_RESULT; 01 = TO_MEMORY_BUS; 10 = from_memory
+                            write = 1;
                         end
         endcase
     end
