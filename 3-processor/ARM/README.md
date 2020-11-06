@@ -34,17 +34,30 @@ ARM the company licenses the design of CPUs to manufacturers and makes money on 
     - **DCLK**: debug clock, core is clocked by this one only in debug state under the control of the TAP state machine, **MCLK** can free run here and you can output either through **ECLK**
 
 Operating modes:
-- user: executes most application programs
+- user: executes most application programs + kernel since OS will be full user mode
 - fast interrupt **FIQ**: data transfer or channel process
 - interrupt **IRQ**: general-purpose interrupt handling
 - supervisor: protected mode for the OS
 - abort: entered after data or instruction pre-fetch abort
-- system: privileged user mode for the OS (kernel)
 - undefined: entered when an undefined instruction is executed
-
-All modes besides **user** are privileged modes.
 
 Registers:
 - 31 general purpose 32-bit registers
 - 6 status registers
 - a **CPSR** program status register, carrying NZVC flags + some other state bits (like interrupt modes + states)
+- a **SPSR** saved program status register used to save and then restore state on exceptions
+
+- r0-r15: general purpose
+    - a1-a4: synonyms to r0-r3; argument, result or scratch registers
+    - v1-v8: synonyms to r4-r11; variable registers
+    - sb: synonym to r9; static base register
+    - ip: synonym to r12; intra procedure call scratch register
+    - sp: synonym to r13; stack pointer
+    - lr: synonym to r14; link register
+        - used when executing subroutines
+        - receives a copy of pc when a branch with link (**bl**) instruction is executed
+    - pc: synonym to r15; program counter
+
+# Resources
+- [Staged pipeline](https://www.sciencedirect.com/topics/computer-science/stage-pipeline)
+
