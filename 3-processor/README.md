@@ -6,5 +6,5 @@ Contains 2 CPUs:
     - no MMU, so no cache
     - no interrupts
     - no debug mode, so no JTAG + TAP
-    - shitty untested timings, but seems to work
+    - cannot handle more than a 125MHz clock since there's no pipelining
 - 32-bit ARM7 with an ARM9 MMU
