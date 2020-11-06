@@ -25,7 +25,7 @@ CONDITIONS = {
     'le': 0b1101, # Less than or equal      | Z set or N != V
     'al': 0b1110, # Always (unconditional)  | -
     'nv': 0b1111, # Never                   | leads to an unpredictable state
-    '':   0b11111, # use only for parsing the instruction, not used in CPU
+    '':   0b1110, # use only for parsing the instruction, not in CPU
 }
 
 REGISTERS = {
@@ -78,41 +78,23 @@ def parse_instruction(instruction):
                 ix = valid_mnemonic.index('{')
                 itype = formatted_mnemonic[:ix]
 
-                cond = condition
+                cond = CONDITIONS[condition]
 
-                ix = valid_mnemonic.index('}')
-                dtype = formatted_mnemonic[ix+1:]
+                if cond != CONDITIONS['al']:
+                    ix = valid_mnemonic.index('}')
+                    dtype = formatted_mnemonic[ix+1:]
+                else:
+                    dtype = formatted_mnemonic[3:]
 
     if not itype:
         raise Exception('Invalid instruction: {}'.format(instruction))
 
     return itype, cond, dtype, args
 
-# Load and Store word or unsigned byte instructions
-# immediate:
-#             |31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10| 9| 8| 7| 6| 5| 4| 3| 2| 1| 0|
-#             |cond       | 0| 1| I| P| U| B| W| L|Rn         |Rd         |<a_mode2>                          |
-# regular     |cond       | 0| 1| 0| 1| U| B| 0| L|Rn         |Rd         |offset_12                          |
-# pre-indexed |cond       | 0| 1| 0| 1| U| B| 1| L|Rn         |Rd         |offset_12                          |
-# post-indexed|cond       | 0| 1| 0| 0| U| B| 0| L|Rn         |Rd         |offset_12                          |
-#
-# register:
-#             |31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10| 9| 8| 7| 6| 5| 4| 3| 2| 1| 0|
-#             |cond       | 0| 1| I| P| U| B| W| L|Rn         |Rd         |<a_mode2>                          |
-# regular     |cond       | 0| 1| 1| 1| U| B| 0| L|Rn         |Rd         | 0| 0| 0| 0| 0| 0| 0| 0|Rm         |
-# pre-indexed |cond       | 0| 1| 1| 1| U| B| 1| L|Rn         |Rd         | 0| 0| 0| 0| 0| 0| 0| 0|Rm         |
-# post-indexed|cond       | 0| 1| 1| 0| U| B| 0| L|Rn         |Rd         | 0| 0| 0| 0| 0| 0| 0| 0|Rm         |
-
-# scaled register:
-#             |31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10| 9| 8| 7| 6| 5| 4| 3| 2| 1| 0|
-#             |cond       | 0| 1| I| P| U| B| W| L|Rn         |Rd         |<a_mode2>                          |
-# regular     |cond       | 0| 1| 1| 1| U| B| 0| L|Rn         |Rd         |shift_imm     |shift| 0|Rm         |
-# pre-indexed |cond       | 0| 1| 1| 1| U| B| 1| L|Rn         |Rd         |shift_imm     |shift| 0|Rm         |
-# post-indexed|cond       | 0| 1| 1| 0| U| B| 0| L|Rn         |Rd         |shift_imm     |shift| 0|Rm         |
 def encode_load_store(args, cond, L, B):
     encoding = 0
 
-    encoding |= CONDITIONS[cond] << 28
+    encoding |= cond << 28
     encoding |= 0b01 << 26
     encoding |= B << 22
     encoding |= L << 20
@@ -126,22 +108,35 @@ def encode_load_store(args, cond, L, B):
     if src[-1] == ']': # regular
         W = 0b00
         P = 0b01
-        Rn, addr_mode = [a.strip() for a in src.strip('[]').split(',')]
+        tokens = [a.strip() for a in src.strip('[]').split(',', 1)]
+        if len(tokens) == 1:
+            Rn = tokens[0]
+        elif len(tokens) == 2:
+            Rn, addr_mode = tokens[0], tokens[1]
     elif src[-1] == '!': # pre-indexed
         W = 0b01
         P = 0b01
-        Rn, addr_mode = [a.strip() for a in src.strip('![]').split(',')]
+        tokens = [a.strip() for a in src.strip('![]').split(',', 1)]
+        if len(tokens) == 1:
+            Rn = tokens[0]
+        elif len(tokens) == 2:
+            Rn, addr_mode = tokens[0], tokens[1]
     else: # post-indexed
         W = 0b00
         P = 0b00
         Rn, addr_mode = [a.strip('[] ') for a in src.split(',', 1)]
 
-    if Rn is None or addr_mode is None:
+    if Rn is None:
         raise Exception('Invalid type for {}'.format(args))
 
     encoding |= REGISTERS[Rn] << 16
     encoding |= P << 24
     encoding |= W << 21
+
+    if addr_mode is None:
+        U = 0b01
+        encoding |= U << 23
+        return encoding
 
     # determine addressing mode
     addr_mode = [a.strip() for a in addr_mode.split(',')]
@@ -157,23 +152,24 @@ def encode_load_store(args, cond, L, B):
             elif token[1].isdigit():
                 U, offset_12 = 0b01, int(token[1:])
             elif token[1] == '-':
-                U, offset_12 = 0b00, int(token[1:])
+                U, offset_12 = 0b00, int(token[2:])
             else:
                 raise Exception('Invalid addressing mode in {}'.format(args))
 
             assert offset_12 < 1 << 12
-            encoding |= offset_12 << 12
-        elif token in REGISTERS: # register
+            encoding |= offset_12
+        else:
             I = 0b01
             Rm = 0b00
             if token[0] == '+':
                 U, Rm = 0b01, token[1:]
+            elif token[0] == '-':
+                U, Rm = 0b00, token[1:]
             elif token[0].isalpha():
                 U, Rm = 0b01, token
             else:
                 raise Exception('Invalid addressing mode in {}'.format(args))
-
-            encoding |= REGISTERS[Rm] << 4
+            encoding |= REGISTERS[Rm]
     elif len(addr_mode) >= 2: # scaled register
         I = 0b01
         if addr_mode[0][0] == '+' or addr_mode[0][0].isalpha():
@@ -198,9 +194,9 @@ def encode_load_store(args, cond, L, B):
         else:
             raise Exception('Invalid addressing mode in {}'.format(args))
 
-        encoding |= shift_imm << 12
-        encoding |= shift << 7
-        encoding |= REGISTERS[Rm] << 4
+        encoding |= shift_imm << 7
+        encoding |= shift << 5
+        encoding |= REGISTERS[Rm]
     else:
         raise Exception('Invalid addressing mode in {}'.format(args))
 
@@ -224,16 +220,25 @@ def second_pass(instructions):
 
         if encoding: encodings.append(encoding)
 
-    return encodings
+    packed_encodings = []
+    for encoding in encodings:
+        packed = struct.pack('<I', encoding)
+        packed_encodings.append(packed)
 
-if len(sys.argv) != 2:
-    print('Error: no input file to assemble. Usage: ./asm.py <file>.s')
-    exit(1)
+    return packed_encodings
+
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print('Error: no input file to assemble. Usage: ./asm.py <file>.s')
+        exit(1)
 
 
-with open(sys.argv[1], 'r') as fin:
-    source_lines = fin.readlines()
+    with open(sys.argv[1], 'r') as fin:
+        source_lines = fin.readlines()
 
-    instructions = first_pass(source_lines)
-    encodings = second_pass(instructions)
+        instructions = first_pass(source_lines)
+        encodings = second_pass(instructions)
+
+        for encoding in encodings:
+            print(encoding)
 
