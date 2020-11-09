@@ -202,9 +202,23 @@ def test_encode_swap():
     print('Done testing swap...')
 
 
+def test_swi():
+    print('Testing swi...')
+
+    table = {
+        ' swi 43': b'\x2B\x00\x00\xEF',
+        ' swieq 43': b'\x2B\x00\x00\x0F',
+    }
+
+    test(table)
+
+    print('Done testing swi...')
+
+
 test_encode_load_store()
 test_encode_move()
 test_encode_compare()
 test_encode_alu()
 test_encode_multiply()
 test_encode_swap()
+test_swi()

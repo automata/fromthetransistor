@@ -20,7 +20,9 @@ VALID_MNEMONICS = [
     # compares
     'cmp{}', 'cmn{}', 'tst{}', 'teq{}',
     # swap
-    'swp{}', 'swp{}b'
+    'swp{}', 'swp{}b',
+    # software interrupt
+    'swi{}',
 ]
 
 CONDITIONS = {
@@ -428,6 +430,18 @@ def encode_swap(cond, B, args):
     return encoding
 
 
+def encode_swi(cond, args):
+    encoding = 0
+
+    immed_24 = int(args.split()[0].strip())
+
+    encoding |= cond << 28
+    encoding |= ((1 << 4) - 1) << 24
+    encoding |= immed_24
+
+    return encoding
+
+
 # encode instructions and write object file
 def second_pass(instructions):
     encodings = []
@@ -456,6 +470,8 @@ def second_pass(instructions):
             encoding = encode_multiply(cond, S = 0b01 if dtype == 's' else 0b00, acc = True, args = args)
         elif itype == 'swp':
             encoding = encode_swap(cond, B = 1 if dtype == 'b' else 0, args = args)
+        elif itype == 'swi':
+            encoding = encode_swi(cond, args)
 
         if encoding: encodings.append(encoding)
 
