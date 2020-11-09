@@ -187,8 +187,24 @@ def test_encode_multiply():
     print('Done testing encode_multiply...')
 
 
+def test_encode_swap():
+    print('Testing swap...')
+
+    table = {
+        ' swp r1, r2, [r3]': b'\x92\x10\x03\xE1',
+        ' swpeq r1, r2, [r3]': b'\x92\x10\x03\x01',
+        ' swpb r1, r2, [r3]': b'\x92\x10\x43\xE1',
+        ' swpeqb r1, r2, [r3]': b'\x92\x10\x43\x01',
+    }
+
+    test(table)
+
+    print('Done testing swap...')
+
+
 test_encode_load_store()
 test_encode_move()
 test_encode_compare()
 test_encode_alu()
 test_encode_multiply()
+test_encode_swap()

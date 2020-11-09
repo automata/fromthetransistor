@@ -19,6 +19,8 @@ VALID_MNEMONICS = [
     'mla{}', 'mla{}s',
     # compares
     'cmp{}', 'cmn{}', 'tst{}', 'teq{}',
+    # swap
+    'swp{}', 'swp{}b'
 ]
 
 CONDITIONS = {
@@ -409,6 +411,23 @@ def encode_multiply(cond, S, acc, args):
     return encoding
 
 
+def encode_swap(cond, B, args):
+    encoding = 0
+
+    Rd, Rm, Rn = [i.strip(' []\n') for i in args.split(',')]
+
+    encoding |= cond << 28
+    encoding |= 1 << 24
+    encoding |= B << 22
+    encoding |= REGISTERS[Rn] << 16
+    encoding |= REGISTERS[Rd] << 12
+    encoding |= 1 << 7
+    encoding |= 1 << 4
+    encoding |= REGISTERS[Rm]
+
+    return encoding
+
+
 # encode instructions and write object file
 def second_pass(instructions):
     encodings = []
@@ -435,6 +454,8 @@ def second_pass(instructions):
             encoding = encode_multiply(cond, S = 0b01 if dtype == 's' else 0b00, acc = False, args = args)
         elif itype == 'mla':
             encoding = encode_multiply(cond, S = 0b01 if dtype == 's' else 0b00, acc = True, args = args)
+        elif itype == 'swp':
+            encoding = encode_swap(cond, B = 1 if dtype == 'b' else 0, args = args)
 
         if encoding: encodings.append(encoding)
 
