@@ -3,9 +3,11 @@ import re
 import sys
 import struct
 
+
 VALID_MNEMONICS = [
     'ldr{}', 'ldr{}b',
     'str{}', 'str{}b',
+    'b{}', 'bl{}',
 ]
 
 CONDITIONS = {
@@ -35,15 +37,16 @@ REGISTERS = {
     'r12': 0b1100, 'r13': 0b1101, 'r14': 0b1110, 'r15': 0b1111,
 }
 
-
 lc = 0 # address of current instruction
 symbol_table = {} # key: symbol, value: address
+
 
 # source line format: {symbol} {instruction | directive | pseudo-instruction} {@ comment}
 def parse_source_line(line):
     tokens = line.split('@')[0] # remove comment
     symbol, instruction = [i.strip(' :\n') for i in re.split('\s', tokens, 1)]
     return symbol, instruction
+
 
 # builds symbol table and returns the instructions
 def first_pass(source_lines):
@@ -63,6 +66,7 @@ def first_pass(source_lines):
             instructions.append(instruction)
 
     return instructions
+
 
 def parse_instruction(instruction):
     mnemonic, args = instruction.split(' ', 1)
@@ -90,6 +94,12 @@ def parse_instruction(instruction):
         raise Exception('Invalid instruction: {}'.format(instruction))
 
     return itype, cond, dtype, args
+
+
+def sign_extend(value, bits):
+    sign_bit = 1 << (bits - 1)
+    return (value & (sign_bit - 1)) - (value & sign_bit)
+
 
 def encode_load_store(args, cond, L, B):
     encoding = 0
@@ -205,6 +215,25 @@ def encode_load_store(args, cond, L, B):
 
     return encoding
 
+
+def encode_branch(args, cond, L):
+    encoding = 0
+
+    encoding |= cond << 28
+    print(cond)
+    encoding |= 0b01 << 27
+    encoding |= 0b01 << 25
+    encoding |= L << 24
+
+    signed_imm = int(args[0].strip())
+    assert signed_imm < 1 << 24
+
+    # TODO might need to change this once you work out how to do the prefetch
+    encoding |= sign_extend(signed_imm, 32) << 2
+
+    return encoding
+
+
 # encode instructions and write object file
 def second_pass(instructions):
     encodings = []
@@ -216,7 +245,10 @@ def second_pass(instructions):
             encoding = encode_load_store(args, cond, L = 0b01, B = 0b01 if dtype == 'b' else 0b00)
         elif itype == 'str':
             encoding = encode_load_store(args, cond, L = 0b00, B = 0b01 if dtype == 'b' else 0b00)
-            pass
+        elif itype == 'b':
+            encoding = encode_branch(args, cond, L = 0b00)
+        elif itype == 'bl':
+            encoding = encode_branch(args, cond, L = 0b01)
 
         if encoding: encodings.append(encoding)
 
@@ -227,18 +259,24 @@ def second_pass(instructions):
 
     return packed_encodings
 
+
 if __name__ == '__main__':
     if len(sys.argv) != 2:
         print('Error: no input file to assemble. Usage: ./asm.py <file>.s')
         exit(1)
 
+    filename = sys.argv[1]
+    fin = open(filename, 'r')
+    source_lines = fin.readlines()
+    fin.close()
 
-    with open(sys.argv[1], 'r') as fin:
-        source_lines = fin.readlines()
+    instructions = first_pass(source_lines)
+    encodings = second_pass(instructions)
 
-        instructions = first_pass(source_lines)
-        encodings = second_pass(instructions)
+    fout = open(''.join([filename.split('.')[0], '.o']), 'wb')
+    for encoding in encodings:
+        print(encoding)
+        fout.write(encoding)
+    fout.close()
 
-        for encoding in encodings:
-            print(encoding)
 
