@@ -167,7 +167,28 @@ def test_encode_alu():
 
     print('Done testing encode_compare')
 
+
+def test_encode_multiply():
+    print('Testing encode_multiply...')
+
+    table = {
+        ' mul r2, r3, r4': b'\x93\x04\x02\xE0',
+        ' muls r2, r3, r4': b'\x93\x04\x12\xE0',
+        ' muleq r2, r3, r4': b'\x93\x04\x02\x00',
+        ' muleqs r2, r3, r4': b'\x93\x04\x12\x00',
+        ' mla r2, r3, r4, r5': b'\x93\x54\x22\xE0',
+        ' mlas r2, r3, r4, r5': b'\x93\x54\x32\xE0',
+        ' mlaeq r2, r3, r4, r5': b'\x93\x54\x22\x00',
+        ' mlaeqs r2, r3, r4, r5': b'\x93\x54\x32\x00',
+    }
+
+    test(table)
+
+    print('Done testing encode_multiply...')
+
+
 test_encode_load_store()
 test_encode_move()
 test_encode_compare()
 test_encode_alu()
+test_encode_multiply()

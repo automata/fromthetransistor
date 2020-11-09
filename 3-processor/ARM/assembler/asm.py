@@ -14,6 +14,9 @@ VALID_MNEMONICS = [
     # alus
     'add{}', 'sub{}', 'rsb{}', 'adc{}', 'sbc{}', 'rsc{}', 'and{}', 'bic{}', 'eor{}', 'orr{}',
     'add{}s', 'sub{}s', 'rsb{}s', 'adc{}s', 'sbc{}s', 'rsc{}s', 'and{}s', 'bic{}s', 'eor{}s', 'orr{}s',
+    # multiply
+    'mul{}', 'mul{}s',
+    'mla{}', 'mla{}s',
     # compares
     'cmp{}', 'cmn{}', 'tst{}', 'teq{}',
 ]
@@ -383,6 +386,29 @@ def encode_alu(cond, mnemonic, S, args):
 
     return encoding
 
+
+def encode_multiply(cond, S, acc, args):
+    encoding = 0
+    Rd, Rm, Rs, Rn = 0, 0, 0, 0
+
+    if acc:
+        Rd, Rm, Rs, Rn = [i.strip() for i in args.split(',')]
+        encoding |= REGISTERS[Rn] << 12
+        encoding |= 1 << 21
+    else:
+        Rd, Rm, Rs = [i.strip() for i in args.split(',')]
+
+    encoding |= cond << 28
+    encoding |= S << 20
+    encoding |= REGISTERS[Rd] << 16
+    encoding |= REGISTERS[Rs] << 8
+    encoding |= 1 << 7
+    encoding |= 1 << 4
+    encoding |= REGISTERS[Rm]
+
+    return encoding
+
+
 # encode instructions and write object file
 def second_pass(instructions):
     encodings = []
@@ -405,6 +431,10 @@ def second_pass(instructions):
             encoding = encode_compare(cond, itype, args = args)
         elif itype == 'mov' or itype == 'mvn':
             encoding = encode_move(cond, itype, S = 0b01 if dtype == 's' else 0b00, args = args)
+        elif itype == 'mul':
+            encoding = encode_multiply(cond, S = 0b01 if dtype == 's' else 0b00, acc = False, args = args)
+        elif itype == 'mla':
+            encoding = encode_multiply(cond, S = 0b01 if dtype == 's' else 0b00, acc = True, args = args)
 
         if encoding: encodings.append(encoding)
 
