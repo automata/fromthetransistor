@@ -8,6 +8,14 @@ VALID_MNEMONICS = [
     'ldr{}', 'ldr{}b',
     'str{}', 'str{}b',
     'b{}', 'bl{}',
+    # moves
+    'mov{}', 'mvn{}',
+    'mov{}s', 'mvn{}s',
+    # alus
+    'add{}', 'sub{}', 'rsb{}', 'adc{}', 'sbc{}', 'rsc{}', 'and{}', 'bic{}', 'eor{}', 'orr{}',
+    'add{}s', 'sub{}s', 'rsb{}s', 'adc{}s', 'sbc{}s', 'rsc{}s', 'and{}s', 'bic{}s', 'eor{}s', 'orr{}s',
+    # compares
+    'cmp{}', 'cmn{}', 'tst{}', 'teq{}',
 ]
 
 CONDITIONS = {
@@ -28,6 +36,25 @@ CONDITIONS = {
     'al': 0b1110, # Always (unconditional)  | -
     'nv': 0b1111, # Never                   | leads to an unpredictable state
     '':   0b1110, # use only for parsing the instruction, not in CPU
+}
+
+DATA_PROCESSING_OPCODE = {
+    'and': 0b0000,
+    'eor': 0b0001,
+    'sub': 0b0010,
+    'rsb': 0b0011,
+    'add': 0b0100,
+    'adc': 0b0101,
+    'sbc': 0b0110,
+    'rsc': 0b0111,
+    'tst': 0b1000,
+    'teq': 0b1001,
+    'cmp': 0b1010,
+    'cmn': 0b1011,
+    'orr': 0b1100,
+    'mov': 0b1101,
+    'bic': 0b1110,
+    'mvn': 0b1111,
 }
 
 REGISTERS = {
@@ -220,7 +247,6 @@ def encode_branch(args, cond, L):
     encoding = 0
 
     encoding |= cond << 28
-    print(cond)
     encoding |= 0b01 << 27
     encoding |= 0b01 << 25
     encoding |= L << 24
@@ -233,6 +259,129 @@ def encode_branch(args, cond, L):
 
     return encoding
 
+def encode_data_processing_shifter(shifter):
+    encoding = 0
+    shifter_operand = 0b00
+    I = 0b00
+
+    tokens = [i.strip() for i in shifter.split(',')]
+    if len(tokens) == 1:
+        if tokens[0][0] == '#': # immediate
+            I = 0b01
+            shifter_operand |= int(tokens[0][1:])
+        elif tokens[0][0] == 'r': # register
+            shifter_operand |= REGISTERS[tokens[0]]
+    elif len(tokens) == 2:
+        Rm = REGISTERS[tokens[0]]
+
+        move = tokens[1].split()
+        if move[0] == 'LSL':
+            if move[1][0] == '#': # immediate
+                shift_imm = int(move[1][1:])
+                shifter_operand |= shift_imm << 7
+                shifter_operand |= Rm
+            else:
+                Rs = REGISTERS[move[1]]
+                shifter_operand |= Rs << 8
+                shifter_operand |= 1 << 4
+                shifter_operand |= Rm
+        elif move[0] == 'LSR':
+            if move[1][0] == '#': # immediate
+                shift_imm = int(move[1][1:])
+                shifter_operand |= shift_imm << 7
+                shifter_operand |= 1 << 5
+                shifter_operand |= Rm
+            else:
+                Rs = REGISTERS[move[1]]
+                shifter_operand |= Rs << 8
+                shifter_operand |= 1 << 5
+                shifter_operand |= 1 << 4
+                shifter_operand |= Rm
+        elif move[0] == 'ASR':
+            if move[1][0] == '#': # immediate
+                shift_imm = int(move[1][1:])
+                shifter_operand |= shift_imm << 7
+                shifter_operand |= 1 << 6
+                shifter_operand |= Rm
+            else:
+                Rs = REGISTERS[move[1]]
+                shifter_operand |= Rs << 8
+                shifter_operand |= 1 << 6
+                shifter_operand |= 1 << 4
+                shifter_operand |= Rm
+        elif move[0] == 'ROR':
+            if move[1][0] == '#': # immediate
+                shift_imm = int(move[1][1:])
+                shifter_operand |= shift_imm << 7
+                shifter_operand |= 1 << 6
+                shifter_operand |= 1 << 5
+                shifter_operand |= Rm
+            else:
+                Rs = REGISTERS[move[1]]
+                shifter_operand |= Rs << 8
+                shifter_operand |= 1 << 6
+                shifter_operand |= 1 << 5
+                shifter_operand |= 1 << 4
+                shifter_operand |= Rm
+        elif move[0] == 'RRX':
+            shifter_operand |= 1 << 6
+            shifter_operand |= 1 << 5
+            shifter_operand |= Rm
+    else:
+        raise Exception('Invalid arguments: {}'.format(args))
+
+    encoding |= I << 25
+    encoding |= shifter_operand
+
+    return encoding
+
+
+def encode_move(cond, mnemonic, S, args):
+    encoding = 0
+
+    Rd, shifter = [i.strip() for i in args.split(',', 1)]
+
+    opcode = DATA_PROCESSING_OPCODE[mnemonic]
+
+    encoding |= cond << 28
+    encoding |= opcode << 21
+    encoding |= S << 20
+    encoding |= REGISTERS[Rd] << 12
+    encoding |= encode_data_processing_shifter(shifter)
+
+    return encoding
+
+
+def encode_compare(cond, mnemonic, args):
+    encoding = 0
+
+    Rn, shifter = [i.strip() for i in args.split(',', 1)]
+
+    opcode = DATA_PROCESSING_OPCODE[mnemonic]
+
+    encoding |= cond << 28
+    encoding |= opcode << 21
+    encoding |= 0b01 << 20
+    encoding |= REGISTERS[Rn] << 16
+    encoding |= encode_data_processing_shifter(shifter)
+
+    return encoding
+
+def encode_alu(cond, mnemonic, S, args):
+    encoding = 0
+
+    Rd, Rn, shifter = [i.strip() for i in args.split(',', 2)]
+
+    opcode = DATA_PROCESSING_OPCODE[mnemonic]
+
+    encoding |= cond << 28
+    encoding |= opcode << 21
+    encoding |= S << 20
+    encoding |= REGISTERS[Rn] << 16
+    encoding |= REGISTERS[Rd] << 12
+    encoding |= encode_data_processing_shifter(shifter)
+
+    return encoding
 
 # encode instructions and write object file
 def second_pass(instructions):
@@ -249,6 +398,13 @@ def second_pass(instructions):
             encoding = encode_branch(args, cond, L = 0b00)
         elif itype == 'bl':
             encoding = encode_branch(args, cond, L = 0b01)
+        elif itype == 'add' or itype == 'sub' or itype == 'rsb' or itype == 'adc' or itype == 'sbc'\
+            or itype == 'rsc' or itype == 'and' or itype == 'bic' or itype == 'eor' or itype == 'orr':
+            encoding = encode_alu(cond, itype, S = 0b01 if dtype == 's' else 0b00, args = args)
+        elif itype == 'cmp' or itype == 'cmn' or itype == 'tst' or itype == 'teq':
+            encoding = encode_compare(cond, itype, args = args)
+        elif itype == 'mov' or itype == 'mvn':
+            encoding = encode_move(cond, itype, S = 0b01 if dtype == 's' else 0b00, args = args)
 
         if encoding: encodings.append(encoding)
 

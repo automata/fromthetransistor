@@ -8,27 +8,14 @@ def pack(num):
 def unpack(num):
     return struct.unpack('<I', num)
 
-# Load and Store word or unsigned byte instructions
-# immediate:
-#             |31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10| 9| 8| 7| 6| 5| 4| 3| 2| 1| 0|
-#             |cond       | 0| 1| I| P| U| B| W| L|Rn         |Rd         |<a_mode2>                          |
-# regular     |cond       | 0| 1| 0| 1| U| B| 0| L|Rn         |Rd         |offset_12                          |
-# pre-indexed |cond       | 0| 1| 0| 1| U| B| 1| L|Rn         |Rd         |offset_12                          |
-# post-indexed|cond       | 0| 1| 0| 0| U| B| 0| L|Rn         |Rd         |offset_12                          |
-#
-# register:
-#             |31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10| 9| 8| 7| 6| 5| 4| 3| 2| 1| 0|
-#             |cond       | 0| 1| I| P| U| B| W| L|Rn         |Rd         |<a_mode2>                          |
-# regular     |cond       | 0| 1| 1| 1| U| B| 0| L|Rn         |Rd         | 0| 0| 0| 0| 0| 0| 0| 0|Rm         |
-# pre-indexed |cond       | 0| 1| 1| 1| U| B| 1| L|Rn         |Rd         | 0| 0| 0| 0| 0| 0| 0| 0|Rm         |
-# post-indexed|cond       | 0| 1| 1| 0| U| B| 0| L|Rn         |Rd         | 0| 0| 0| 0| 0| 0| 0| 0|Rm         |
+def test(table):
+    instructions = asm.first_pass(list(table.keys()))
+    encodings = asm.second_pass(instructions)
 
-# scaled register:
-#             |31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10| 9| 8| 7| 6| 5| 4| 3| 2| 1| 0|
-#             |cond       | 0| 1| I| P| U| B| W| L|Rn         |Rd         |<a_mode2>                          |
-# regular     |cond       | 0| 1| 1| 1| U| B| 0| L|Rn         |Rd         |shift_imm     |shift| 0|Rm         |
-# pre-indexed |cond       | 0| 1| 1| 1| U| B| 1| L|Rn         |Rd         |shift_imm     |shift| 0|Rm         |
-# post-indexed|cond       | 0| 1| 1| 0| U| B| 0| L|Rn         |Rd         |shift_imm     |shift| 0|Rm         |
+    for i, (instr, valid_encoding) in enumerate(table.items()):
+        print(instr)
+        assert unpack(encodings[i]) == unpack(valid_encoding)
+
 def test_encode_load_store():
     print('Testing encode_load_store ...')
 
@@ -88,16 +75,99 @@ def test_encode_load_store():
         ' ldr r0, [r1], -r2, RRX': b'\x62\x00\x11\xE6',
     }
 
-    instructions = asm.first_pass(list(table.keys()))
-    encodings = asm.second_pass(instructions)
-
-    for i, (_, valid_encoding) in enumerate(table.items()):
-        assert unpack(encodings[i]) == unpack(valid_encoding)
-
-
-    # pre-indexed loads
-    # post-indexed loads
-
     print('Done testing encode_load_store')
 
+
+def test_encode_move():
+    print('Testing encode_move ...')
+
+    table = {
+        ' mov r0, #10': b'\x0A\x00\xA0\xE3',
+        ' mvn r0, #10': b'\x0A\x00\xE0\xE3', # just the opcode differs
+        ' mvn r4, #10': b'\x0A\x40\xE0\xE3',
+        ' movs r0, #10': b'\x0A\x00\xB0\xE3',
+        ' moveq r0, #10': b'\x0A\x00\xA0\x03',
+        ' moveqs r0, #10': b'\x0A\x00\xB0\x03',
+        ' mov r0, r1': b'\x01\x00\xA0\xE1',
+        ' mov r0, r1, LSL #10': b'\x01\x05\xA0\xE1',
+        ' mov r0, r1, LSL r4': b'\x11\x04\xA0\xE1',
+        ' mov r0, r1, LSR #10': b'\x21\x05\xA0\xE1',
+        ' mov r0, r1, LSR r4': b'\x31\x04\xA0\xE1',
+        ' mov r0, r1, ASR #10': b'\x41\x05\xA0\xE1',
+        ' mov r0, r1, ASR r4': b'\x51\x04\xA0\xE1',
+        ' mov r0, r1, ROR #10': b'\x61\x05\xA0\xE1',
+        ' mov r0, r1, ROR r4': b'\x71\x04\xA0\xE1',
+        ' mov r0, r1, RRX': b'\x61\x00\xA0\xE1',
+    }
+
+    test(table)
+
+    print('Done testing encode_move')
+
+
+def test_encode_compare():
+    print('Testing encode_compare ...')
+
+    table = {
+        ' cmp r0, #10': b'\x0A\x00\x50\xE3',
+        ' cmp r3, #10': b'\x0A\x00\x53\xE3',
+        ' cmpeq r3, #10': b'\x0A\x00\x53\x03',
+        ' cmn r3, #10': b'\x0A\x00\x73\xE3',
+        ' cmneq r3, #10': b'\x0A\x00\x73\x03',
+        ' teq r3, #10': b'\x0A\x00\x33\xE3',
+        ' teqeq r3, #10': b'\x0A\x00\x33\x03',
+        ' tst r3, #10': b'\x0A\x00\x13\xE3',
+        ' tsteq r3, #10': b'\x0A\x00\x13\x03',
+        ' cmp r0, r1': b'\x01\x00\x50\xE1',
+        ' cmp r0, r1, LSL #10': b'\x01\x05\x50\xE1',
+        ' cmp r0, r1, LSL r4': b'\x11\x04\x50\xE1',
+        ' cmp r0, r1, LSR #10': b'\x21\x05\x50\xE1',
+        ' cmp r0, r1, LSR r4': b'\x31\x04\x50\xE1',
+        ' cmp r0, r1, ASR #10': b'\x41\x05\x50\xE1',
+        ' cmp r0, r1, ASR r4': b'\x51\x04\x50\xE1',
+        ' cmp r0, r1, ROR #10': b'\x61\x05\x50\xE1',
+        ' cmp r0, r1, ROR r4': b'\x71\x04\x50\xE1',
+        ' cmp r0, r1, RRX': b'\x61\x00\x50\xE1',
+    }
+
+    test(table)
+
+    print('Done testing encode_compare')
+
+
+def test_encode_alu():
+    print('Testing encode_compare ...')
+
+    table = {
+        ' add r4, r2, #10': b'\x0A\x40\x82\xE2',
+        ' sub r4, r2, #10': b'\x0A\x40\x42\xE2',
+        ' rsb r4, r2, #10': b'\x0A\x40\x62\xE2',
+        ' sbc r4, r2, #10': b'\x0A\x40\xC2\xE2',
+        ' rsc r4, r2, #10': b'\x0A\x40\xE2\xE2',
+        ' and r4, r2, #10': b'\x0A\x40\x02\xE2',
+        ' bic r4, r2, #10': b'\x0A\x40\xC2\xE3',
+        ' eor r4, r2, #10': b'\x0A\x40\x22\xE2',
+        ' orr r4, r2, #10': b'\x0A\x40\x82\xE3',
+        ' adc r4, r2, #10': b'\x0A\x40\xA2\xE2',
+        ' adcs r4, r2, #10': b'\x0A\x40\xB2\xE2',
+        ' adceqs r4, r2, #10': b'\x0A\x40\xB2\x02',
+        ' adc r4, r1, r7': b'\x07\x40\xA1\xE0',
+        ' adc r4, r7, r3, LSL #10': b'\x03\x45\xA7\xE0',
+        ' adc r4, r7, r3, LSL r5': b'\x13\x45\xA7\xE0',
+        ' adc r4, r7, r3, LSR #10': b'\x23\x45\xA7\xE0',
+        ' adc r4, r7, r3, LSR r5': b'\x33\x45\xA7\xE0',
+        ' adc r4, r7, r3, ASR #10': b'\x43\x45\xA7\xE0',
+        ' adc r4, r7, r3, ASR r5': b'\x53\x45\xA7\xE0',
+        ' adc r4, r7, r3, ROR #10': b'\x63\x45\xA7\xE0',
+        ' adc r4, r7, r3, ROR r5': b'\x73\x45\xA7\xE0',
+        ' adc r4, r7, r3, RRX': b'\x63\x40\xA7\xE0',
+    }
+
+    test(table)
+
+    print('Done testing encode_compare')
+
 test_encode_load_store()
+test_encode_move()
+test_encode_compare()
+test_encode_alu()
