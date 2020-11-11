@@ -8,24 +8,24 @@
 Testbench<Vregister_bank>* tb;
 
 void set_value(int index, int value) {
-    tb->m_core->write = 1;
+    tb->m_core->write_enable = 1;
     tb->m_core->write_sel = index;
-    tb->m_core->write_register_in = value;
+    tb->m_core->reg_in = value;
     tb->tick();
 }
 
 int get_value_1(int index) {
-    tb->m_core->write = 0;
+    tb->m_core->write_enable = 0;
     tb->m_core->read_sel_1 = index;
     tb->tick();
-    return tb->m_core->read_register_out_1;
+    return tb->m_core->reg_out_1;
 }
 
 int get_value_2(int index) {
-    tb->m_core->write = 0;
+    tb->m_core->write_enable = 0;
     tb->m_core->read_sel_2 = index;
     tb->tick();
-    return tb->m_core->read_register_out_2;
+    return tb->m_core->reg_out_2;
 }
 
 int main(int argc, char **argv) {
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 
     int value = 1;
     set_value(0, value);
-    for (int i = 1; i < 31; i++, value += 10) {
+    for (int i = 1; i < 29; i++, value += 10) {
         set_value(i, value);
         printf("r1 = %d :: r2 = %d\n", get_value_1(i - 1), get_value_2(i));
     }

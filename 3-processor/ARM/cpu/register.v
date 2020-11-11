@@ -1,7 +1,7 @@
 module register(
     input wire clk,
     input wire reset,
-    input wire write,
+    input wire write_enable,
     input wire [31:0] data_in,
     output reg [31:0] data_out
 );
@@ -12,7 +12,7 @@ module register(
         if (!reset)
             content <= 32'h00000000;
         else
-            if (write)
+            if (write_enable)
                 content <= data_in;
             else
                 data_out <= content;
