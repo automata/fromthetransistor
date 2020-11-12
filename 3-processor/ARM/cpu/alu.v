@@ -4,11 +4,11 @@ module alu(
     input wire [31:0] a, // from register bank
     input wire [31:0] b, // from barrel shifter
     input wire carry_in,
-    output reg [31:0] result,
-    output reg [3:0] nzvc
+    output bit signed [31:0] result,
+    output bit [3:0] nzvc
 );
-    reg [31:0] a_compl, b_compl, temp;
-    reg carry_out;
+    bit [31:0] a_compl, b_compl, temp;
+    bit carry_out;
 
     always @ (*) begin
         a_compl = (~a + 32'h00000001);

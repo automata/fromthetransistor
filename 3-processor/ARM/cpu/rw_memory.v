@@ -5,10 +5,9 @@ module rw_memory #(parameter size = 64000) (
     input wire write,
     input wire [31:0] address,
     input wire [31:0] data_in,
-    output reg [31:0] data_out
+    output bit [31:0] data_out
 );
-
-    reg [7:0] memory[0:size - 1];
+    bit [7:0] memory[0:size - 1];
 
     always @ (posedge clk or negedge reset)
         if (enable) begin

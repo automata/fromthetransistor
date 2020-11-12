@@ -4,11 +4,11 @@ module memory #(parameter rom_end = 64000)(
     input wire [31:0] data_in,
     input wire [31:0] address,
     input wire write,
-    output reg [31:0] data_out
+    output bit [31:0] data_out
 );
 
-    reg rom_enable, rw_enable;
-    reg [31:0] rom_data_out, rw_data_out;
+    bit rom_enable, rw_enable;
+    bit [31:0] rom_data_out, rw_data_out;
 
     always @ (address) begin
         if (address < rom_end) begin

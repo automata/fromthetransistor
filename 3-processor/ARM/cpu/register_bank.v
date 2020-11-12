@@ -14,10 +14,11 @@ module register_bank #(parameter N = 29) (
     input wire [31:0] reg_in,       // what to write to register
     input integer read_sel_1,       // which register to read from
     input integer read_sel_2,       // which register to read from
-    output reg [31:0] reg_out_1,
-    output reg [31:0] reg_out_2
+    output bit [31:0] reg_out_1,
+    output bit [31:0] reg_out_2
 );
-    reg [31:0] data_in [0:N - 1], data_out [0:N - 1];
+    bit [31:0] data_in  [0:N - 1];
+    bit [31:0] data_out [0:N - 1];
 
     genvar i;
     generate

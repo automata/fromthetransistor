@@ -2,10 +2,9 @@ module rom_memory #(parameter size = 64000) (
     input wire clk,
     input wire enable, // for address validation
     input wire [31:0] address,
-    output reg [31:0] data_out
+    output bit [31:0] data_out
 );
-
-    reg [7:0] ROM [0:size - 1]; // byte sized chunks
+    bit [7:0] ROM [0:size - 1]; // byte sized chunks
 
     initial begin
         // a single instruction is 4 bytes
