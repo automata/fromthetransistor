@@ -37,3 +37,13 @@ barrel_build:
 
 barrel: barrel_verilate barrel_build
 	./barrel
+
+# multiplier
+multiplier_verilate:
+	verilator -Wall --trace -cc multiplier.v --build --exe multiplier.cpp
+	
+multiplier_build:
+	g++ -std=gnu++14 -Wall -Iobj_dir -I/usr/share/verilator/include /usr/share/verilator/include/verilated_vcd_c.cpp /usr/share/verilator/include/verilated.cpp obj_dir/Vmultiplier__ALL.cpp multiplier.cpp -o multiplier
+
+multiplier: multiplier_verilate multiplier_build
+	./multiplier
