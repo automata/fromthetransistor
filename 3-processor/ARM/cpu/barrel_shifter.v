@@ -6,6 +6,7 @@ module barrel_shifter( // rotates right by **select** bits
 
     wire [63:0] double_in = {in, in};
 
+    // hack: equivalent to double_in[select + 31:select]
     assign out = double_in[select + 31-:32];
 
 endmodule
