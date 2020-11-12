@@ -6,21 +6,22 @@
 #include <cassert>
 
 Vbarrel_shifter* tb;
-
+int temp = 0;
 
 int main(int argc, char **argv) {
     Verilated::commandArgs(argc, argv);
     tb = new Vbarrel_shifter;
 
-    tb->in = 4;
-    tb->select = 2;
+    tb->data_in = 4;
+    tb->shift = 2;
     tb->eval();
-    assert(tb->out == 1);
+    temp = tb->data_out;
+    assert(temp == 1);
 
-    tb->in = 4;
-    tb->select = 3;
+    tb->data_in = 4;
+    tb->shift = 3;
     tb->eval();
-    int temp = tb->out;
+    temp = tb->data_out;
     assert(temp == -2147483648);
 
     puts("DONE BARREL.");
