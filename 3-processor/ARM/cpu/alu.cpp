@@ -7,6 +7,8 @@
 
 Valu* tb;
 
+int result = 0;
+
 void test_and() {
     tb->opcode = 0b0000;
     tb->carry_in = 0;
@@ -14,25 +16,29 @@ void test_and() {
     tb->a = 1;
     tb->b = 1;
     tb->eval();
-    assert(tb->res == 1);
+    result = tb->result;
+    assert(result == 1);
     assert(tb->nzvc == 0b0000);
 
     tb->a = 2;
     tb->b = 1;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b0100);
 
     tb->a = -1;
     tb->b = 3;
     tb->eval();
-    assert(tb->res == 3);
+    result = tb->result;
+    assert(result == 3);
     assert(tb->nzvc == 0b0000);
 
     tb->a = -3;
     tb->b = -5;
     tb->eval();
-    assert(tb->res == -7);
+    result = tb->result;
+    assert(result == -7);
     assert(tb->nzvc == 0b1000);
 
     puts("AND PASSED.");
@@ -45,19 +51,22 @@ void test_eor() {
     tb->a = 1;
     tb->b = 1;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b0100);
 
     tb->a = -1;
     tb->b = 1;
     tb->eval();
-    assert(tb->res == -2);
+    result = tb->result;
+    assert(result == -2);
     assert(tb->nzvc == 0b1000);
 
     tb->a = -1;
     tb->b = -6;
     tb->eval();
-    assert(tb->res == 5);
+    result = tb->result;
+    assert(result == 5);
     assert(tb->nzvc == 0b0000);
 
     puts("EOR PASSED.");
@@ -70,13 +79,15 @@ void test_sub() {
     tb->a = -1;
     tb->b = -1;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b0101);
 
     tb->a = -3;
     tb->b = 4;
     tb->eval();
-    assert(tb->res == -7);
+    result = tb->result;
+    assert(result == -7);
     assert(tb->nzvc == 0b1001);
 
     tb->a = -2147483648;
@@ -99,13 +110,15 @@ void test_rsb() {
     tb->a = -1;
     tb->b = -1;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b0101);
 
     tb->a = -3;
     tb->b = 4;
     tb->eval();
-    assert(tb->res == 7);
+    result = tb->result;
+    assert(result == 7);
     assert(tb->nzvc == 0b0000);
 
     puts("RSB PASSED.");
@@ -118,25 +131,29 @@ void test_add() {
     tb->a = -1;
     tb->b = -1;
     tb->eval();
-    assert(tb->res == -2);
+    result = tb->result;
+    assert(result == -2);
     assert(tb->nzvc == 0b1001);
 
     tb->a = -3;
     tb->b = 4;
     tb->eval();
-    assert(tb->res == 1);
+    result = tb->result;
+    assert(result == 1);
     assert(tb->nzvc == 0b0001);
 
     tb->a = 3;
     tb->b = 4;
     tb->eval();
-    assert(tb->res == 7);
+    result = tb->result;
+    assert(result == 7);
     assert(tb->nzvc == 0b0000);
 
     tb->a = -1;
     tb->b = 1;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b0101);
 
     tb->a = 2147483647;
@@ -154,25 +171,29 @@ void test_cmp() {
     tb->a = -1;
     tb->b = -1;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b0101);
 
     tb->a = -3;
     tb->b = 4;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b1001);
 
     tb->a = -2147483648;
     tb->b = 0;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b1000);
 
     tb->a = -2147483648;
     tb->b = 1;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b0011);
 
     puts("CMP PASSED.");
@@ -185,31 +206,36 @@ void test_cmn() {
     tb->a = -1;
     tb->b = -1;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b1001);
 
     tb->a = -3;
     tb->b = 4;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b0001);
 
     tb->a = 3;
     tb->b = 4;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b0000);
 
     tb->a = -1;
     tb->b = 1;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b0101);
 
     tb->a = 2147483647;
     tb->b = 1;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b1010);
 
     puts("CMN PASSED.");
@@ -222,7 +248,8 @@ void test_adc() {
     tb->a = 1;
     tb->b = 1;
     tb->eval();
-    assert(tb->res == 3);
+    result = tb->result;
+    assert(result == 3);
     assert(tb->nzvc == 0b0000);
 
     puts("ADC PASSED.");
@@ -235,7 +262,8 @@ void test_sbc() {
     tb->a = 1;
     tb->b = 1;
     tb->eval();
-    assert(tb->res == -1);
+    result = tb->result;
+    assert(result == -1);
     assert(tb->nzvc == 0b1000);
 
     puts("SBC PASSED.");
@@ -244,30 +272,34 @@ void test_sbc() {
 void test_tst() {
     tb->opcode = 0b1000;
     tb->carry_in = 0;
-    tb->res = 0;
+    tb->result = 0;
 
     tb->a = 1;
     tb->b = 1;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b0000);
 
     tb->a = 2;
     tb->b = 1;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b0100);
 
     tb->a = -1;
     tb->b = 3;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b0000);
 
     tb->a = -3;
     tb->b = -5;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b1000);
 
     puts("TST PASSED.");
@@ -280,19 +312,22 @@ void test_teq() {
     tb->a = 1;
     tb->b = 1;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b0100);
 
     tb->a = -1;
     tb->b = 1;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b1000);
 
     tb->a = -1;
     tb->b = -6;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b0000);
 
     puts("TEQ PASSED.");
@@ -305,25 +340,29 @@ void test_orr() {
     tb->a = 1;
     tb->b = 1;
     tb->eval();
-    assert(tb->res == 1);
+    result = tb->result;
+    assert(result == 1);
     assert(tb->nzvc == 0b0000);
 
     tb->a = 2;
     tb->b = 1;
     tb->eval();
-    assert(tb->res == 3);
+    result = tb->result;
+    assert(result == 3);
     assert(tb->nzvc == 0b0000);
 
     tb->a = -1;
     tb->b = 3;
     tb->eval();
-    assert(tb->res == -1);
+    result = tb->result;
+    assert(result == -1);
     assert(tb->nzvc == 0b1000);
 
     tb->a = 0;
     tb->b = 0;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b0100);
 
     puts("ORR PASSED.");
@@ -335,12 +374,14 @@ void test_mov() {
 
     tb->b = 45;
     tb->eval();
-    assert(tb->res == 45);
+    result = tb->result;
+    assert(result == 45);
     assert(tb->nzvc == 0b0000);
 
     tb->b = 0;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b0100);
 
     tb->b = -1;
@@ -357,13 +398,15 @@ void test_bic() {
     tb->a = 3;
     tb->b = 0;
     tb->eval();
-    assert(tb->res == 3);
+    result = tb->result;
+    assert(result == 3);
     assert(tb->nzvc == 0b0000);
 
     tb->a = -1;
     tb->b = -1;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b0100);
 
     puts("BIC PASSED.");
@@ -375,7 +418,8 @@ void test_mvn() {
 
     tb->b = -1;
     tb->eval();
-    assert(tb->res == 0);
+    result = tb->result;
+    assert(result == 0);
     assert(tb->nzvc == 0b0100);
 
     puts("MVN PASSED.");
