@@ -9,23 +9,23 @@ Testbench<Vregister_bank>* tb;
 
 void set_value(int index, int value) {
     tb->m_core->write_enable = 1;
-    tb->m_core->write_sel = index;
-    tb->m_core->reg_in = value;
+    tb->m_core->write_index = index;
+    tb->m_core->data_in = value;
     tb->tick();
 }
 
 int get_value_1(int index) {
     tb->m_core->write_enable = 0;
-    tb->m_core->read_sel_1 = index;
+    tb->m_core->read_index_1 = index;
     tb->tick();
-    return tb->m_core->reg_out_1;
+    return tb->m_core->data_out_1;
 }
 
 int get_value_2(int index) {
     tb->m_core->write_enable = 0;
-    tb->m_core->read_sel_2 = index;
+    tb->m_core->read_index_2 = index;
     tb->tick();
-    return tb->m_core->reg_out_2;
+    return tb->m_core->data_out_2;
 }
 
 int main(int argc, char **argv) {
