@@ -3,7 +3,7 @@ module multiplier(
     input wire clk,
     input wire [31:0] a,
     input wire [31:0] b,
-    output logic signed [63:0] result
+    output logic signed [31:0] result
 );
     logic signed [31:0] ax;
     logic signed [31:0] bx;
