@@ -1,16 +1,16 @@
-module memory #(parameter rom_end = 64000)(
+module memory #(parameter rom_end = 64000) (
     input wire clk,
     input wire reset,
     input wire [31:0] data_in,
     input wire [31:0] address,
     input wire write,
-    output bit [31:0] data_out
+    output logic [31:0] data_out
 );
 
-    bit rom_enable, rw_enable;
-    bit [31:0] rom_data_out, rw_data_out;
+    logic rom_enable, rw_enable;
+    logic [31:0] rom_data_out, rw_data_out;
 
-    always @ (address) begin
+    always_comb begin
         if (address < rom_end) begin
             rom_enable = 1'b1;
             data_out = rom_data_out;

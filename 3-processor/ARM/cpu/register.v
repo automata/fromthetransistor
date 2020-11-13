@@ -3,9 +3,9 @@ module register(
     input wire reset,
     input wire write_enable,
     input wire [31:0] data_in,
-    output bit [31:0] data_out
+    output logic [31:0] data_out
 );
-    bit [31:0] content;
+    logic [31:0] content;
 
     always @ (posedge clk or negedge reset)
         if (!reset)
