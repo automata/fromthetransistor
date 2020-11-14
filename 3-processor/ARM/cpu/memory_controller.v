@@ -68,8 +68,6 @@ module memory_controller(
     logic reg_nrw;
     logic reg_nopc;
 
-    logic can_fetch;
-
     // latch memory access info
     always_ff @ (posedge mclk) begin
         if (~ale) begin
@@ -79,13 +77,15 @@ module memory_controller(
             reg_nrw         <= nrw;
             reg_nopc        <= nopc;
             reg_dout        <= dout; // data coming from the processor
-            can_fetch       <= 1'b1;
+        end else begin
+            if (seq)
+                reg_address_bus <= address_bus;
         end
     end
 
     // abort if address is wrong or trying to write to ROM
     always_comb begin
-        if (nrw && reg_address_bus + 4 < ROM_MEMORY_SIZE) begin
+        if (nrw && reg_address_bus + 4 < ROM_MEMORY_SIZE || nmreq) begin
             sabort = 1'b1;
         end
     end
@@ -103,14 +103,14 @@ module memory_controller(
     // init memory
     rom_memory #(.SIZE(ROM_MEMORY_SIZE)) _rom (
         .mclk(mclk),
-        .enable(~nopc && can_fetch && ~sabort),
+        .enable(~nopc && ~nmreq && ~sabort),
         .address(reg_address_bus),
         .data_out(reg_din)
     );
 
     rw_memory #(.SIZE(RW_MEMORY_SIZE)) _rw (
         .mclk(mclk),
-        .enable(nopc && can_fetch && ~sabort),
+        .enable(nopc && ~nmreq && ~sabort),
         .write_enable(nrw),
         .address(reg_address_bus),
         .data_in(reg_dout),
@@ -120,6 +120,12 @@ module memory_controller(
     // update buses
     always_comb begin
         din = reg_din; // data going to the processor
+    end
+
+    // sequential memory access
+    always_ff @ (posedge mclk) begin
+        if (seq && ale) begin
+        end
     end
 
 endmodule
