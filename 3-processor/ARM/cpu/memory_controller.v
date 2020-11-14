@@ -121,11 +121,4 @@ module memory_controller(
     always_comb begin
         din = reg_din; // data going to the processor
     end
-
-    // sequential memory access
-    always_ff @ (posedge mclk) begin
-        if (seq && ale) begin
-        end
-    end
-
 endmodule
