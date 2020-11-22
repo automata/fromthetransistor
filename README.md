@@ -8,6 +8,11 @@ Now cleaned up and going to be software only. Closer to being real.
 - So about those transistors -- Course overview. Describe how FPGAs are buildable using transistors, and that ICs are just collections of transistors in a nice reliable package. Understand the LUTs and stuff. Talk briefly about the theory of transistors, but all projects must build on each other so we can’t build one.
 - Emulation -- Building on real hardware limits the reach of this course. Using something like Verilator will allow anyone with a computer to play.
 
+##### Field programmable gate aray  
+Rectangular table of transistors that can be arranged in the manner desired by its owner. Gates, registers, and wires are the basis for every IC. FPGAs also make extensive use of reconfigurable, hardware-implemented, lookup tables to provide programmable hardware functionality. In the context of combinational logic, it is the truth table. The way FPGAs typically implement combinatorial logic is with LUTs, and when the FPGA gets configured, it just fills in the table output values, which are called the "LUT-Mask", and is physically composed of SRAM bits. Every bit is represented by a transistor inscribed into silicon. A transistor is a semiconductor device used to amplify or switch (0 or 1) electronic signals and electrical power.
+ 
+https://www.intel.com/content/dam/www/programmable/us/en/pdfs/literature/misc/fpgas-for-dummies-ebook.pdf, https://electronics.stackexchange.com/questions/169532/what-is-an-lut-in-fpga, wiki: FPGA, Transistor, Lookup table
+
 #### Section 2: Bringup: What language is hardware coded in? -- 0.5 weeks
 - Blinking an LED(Verilog, 10) -- Your first little program! Getting the simulator working. Learning Verilog.
 - Building a UART(Verilog, 100) -- An intro chapter to Verilog, copy a real UART, introducing the concept of MMIO, though the serial port may be semihosting. Serial test echo program and led control.
