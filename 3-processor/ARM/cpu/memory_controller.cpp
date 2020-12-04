@@ -16,6 +16,9 @@ void tick() {
     printf("address = %d\n lock = %d\n mas = %d\n nrw = %d\n nopc = %d\n", tb->memory_controller__DOT__reg_address_bus, tb->memory_controller__DOT__reg_lock, tb->memory_controller__DOT__reg_mas, tb->memory_controller__DOT__reg_nrw, tb->memory_controller__DOT__reg_nopc);
 
     printf("reg_din = %d din = %d\n", tb->memory_controller__DOT__reg_din, tb->din);
+
+    tb->mclk = 0;
+    tb->eval();
 }
 
 int main(int argc, char **argv) {
@@ -28,6 +31,7 @@ int main(int argc, char **argv) {
     tb->nrw = 0; // read
     tb->nopc = 0; // nopcode
     tb->dout = 0; // dont care
+    tb->nmreq = 0;
 
     tb->ale = 0;
     tick();
@@ -35,8 +39,11 @@ int main(int argc, char **argv) {
     tb->ale = 1;
     tick();
 
+    tb->address_bus = 1;
+    tb->seq = 1;
     tick();
     tick();
+
 
     exit(EXIT_SUCCESS);
 }

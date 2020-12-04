@@ -1,23 +1,46 @@
-// controls the processing unit and instruct writes to memory
+/* Controls the processing unit
+* 3 stage pipeline:
+* - fetch: load instruction register
+* - decode: decode instruction
+* - execute: execute instruction's state machine
+*/
 module control_unit(
-    input wire [31:0] IR_fetch, // contains contents of IR
+    input wire mclk,
+    input wire nreset,
+    input wire [31:0] ir, // instruction register
+    output logic ir_load, // load instruction register with next instruction to be executed
 );
+    logic [31:0] mov_mask;
+    initial begin
+        //             cond  I    SSBZ Rd shifter_op
+        mov_mask = 32'b1111001110111111111111111111111
+    end
 
-    // Moore machine: output depends on current state only
-    reg [31:0] current_state, next_state;
+    parameter s_fetch_0 = 3'b000;
 
-    always @ (posedge clk or negedge reset) // Moore memory
-        if (!reset) current_state <= 4'h00000000;
-        else        current_state <= next_state;
+    logic integer current_state, next_state;
+    always_ff @ (posedge mclk) begin
+        if (nreset)
+            current_state <= state_fetch_0;
+        else
+            current_state <= next_state;
+    end
 
-
-    // pipeline: decode, fetch, execute
-    always @ (current_state, IR_fetch) // define Moore function
+    always_comb begin
         case (current_state)
+            s_fetch_0: next_state = s_decode;
+            s_decode: begin
+            end
         endcase
+    end
 
-    always @ (current_state) // define each state
+    // SBZ reserved for MMU
+    always_comb begin
         case (current_state)
+            s_decode: begin
+                if (ir & mov_mask == mov_mask)
+            end
         endcase
+    end
 
 endmodule

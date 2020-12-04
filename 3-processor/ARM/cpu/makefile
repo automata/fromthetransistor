@@ -1,12 +1,12 @@
-# memory
-memory_verilate:
-	verilator -Wall --trace -cc memory.v --build --exe memory.cpp
+# memory_controller
+memory_controller_verilate:
+	verilator --default-language 1800-2017 --assert -Wall --trace -cc memory_controller.v --build --exe memory_controller.cpp
 
-memory_build:
-	g++ -std=gnu++14 -Wall -Iobj_dir -I/usr/share/verilator/include /usr/share/verilator/include/verilated_vcd_c.cpp /usr/share/verilator/include/verilated.cpp obj_dir/Vmemory__ALL.cpp memory.cpp -o memory
+memory_controller_build:
+	g++ -std=gnu++14 -Wall -Iobj_dir -I/usr/share/verilator/include /usr/share/verilator/include/verilated_vcd_c.cpp /usr/share/verilator/include/verilated.cpp obj_dir/Vmemory_controller__ALL.cpp memory_controller.cpp -o memory_controller
 
-memory: memory_verilate memory_build
-	./memory
+memory_controller: memory_controller_verilate memory_controller_build
+	./memory_controller
 
 # registers
 registers_verilate:

@@ -8,10 +8,11 @@ module rom_memory#(parameter SIZE = 64000) ( // size in bytes
 
     initial begin
         // a single instruction is 4 bytes
-        ROM[0] = 8'hFF;
-        ROM[1] = 8'h00;
+        // mov r0, #1 == 0100A0E3
+        ROM[0] = 8'hE3;
+        ROM[1] = 8'hA0;
         ROM[2] = 8'h00;
-        ROM[3] = 8'h00;
+        ROM[3] = 8'h01;
     end
 
     always_ff @ (posedge mclk)
